@@ -1,0 +1,22 @@
+import os
+
+node_env = os.environ['NODE_ENV']
+
+if node_env != None and node_env != '':
+    os.system('tsc')
+
+    current_path = os.getcwd()
+    dist_path = os.path.join(current_path, 'dist')
+
+    if os.path.exists(dist_path):
+        logs_path = os.path.join(dist_path, 'logs')
+        if not os.path.exists(logs_path):
+            os.mkdir(logs_path)
+        env_file_path = os.path.join(dist_path, f'.{node_env}.env')
+        if not os.path.exists(env_file_path):
+            file = open(env_file_path, 'w+')
+            file.write('PORT_API_HTTP=80\n')
+            file.write('PORT_API_HTTPS=443')
+            file.close()
+else:
+    print('NODE_ENV not found')
