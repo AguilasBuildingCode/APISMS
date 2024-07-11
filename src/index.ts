@@ -2,8 +2,10 @@ import Config, { EnvTypes } from "./config";
 import morgan from "morgan";
 import helmet from "helmet";
 import https from "https";
+import http from "http";
 import express from "express";
-import home from "./routes/home";
+import { sms } from "./routes/sms/sms";
+import { Server } from "socket.io"
 
 const config = Config.getInstance();
 config
@@ -14,6 +16,7 @@ config
 const app = Config.getApp();
 const portAPIHTTP = config.getPortAPIHTTP();
 const portAPIHTTPS = config.getPortAPIHTTPS();
+const io = new Server();
 
 app.use(express.json());
 app.use(
@@ -23,16 +26,16 @@ app.use(
 );
 
 app.use(
-  morgan("common", {
+  morgan("combined", {
     stream: Config.getStreamLog(),
   })
 );
 app.use(helmet());
 
-app.use(home);
+app.use(`/api`, sms);
 
 if (config.getEnv() === EnvTypes.PROD) {
-  https
+  io.attach(https
     .createServer(
       {
         key: config.getKey(),
@@ -42,9 +45,11 @@ if (config.getEnv() === EnvTypes.PROD) {
     )
     .listen(portAPIHTTPS, () => {
       console.log(`Server run on port: ${portAPIHTTPS}`);
-    });
+    }));
 } else {
-  app.listen(portAPIHTTP, () => {
+  io.attach(http.createServer(app).listen(portAPIHTTP, () => {
     console.log(`Server run on port: ${portAPIHTTP}`);
-  });
+  }));
 }
+
+export default io
