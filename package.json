@@ -8,7 +8,7 @@
     "nodemon": "nodemon dist/index.js",
     "dev": "concurrently \"tsc -w\" \"nodemon dist/index.js\"",
     "run": "nodemon dist/index.js",
-    "setup": "python ./setup.py",
+    "setup": "python3 ./setup.py",
     "start": "node dist/index.js"
   },
   "author": "ANPA",

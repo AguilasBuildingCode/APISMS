@@ -17,6 +17,7 @@ send.put("/", (req, res) => {
 });
 
 send.post("/update", (req, res) => {
+    console.log(JSON.stringify(req.rawHeaders))
     const { apiSMSId, smsId, partNumber, totalParts, newStatus } = req.body
     if (typeof apiSMSId != "string" && typeof smsId != "string" && typeof partNumber != "number" && typeof totalParts == "number" &&
         typeof newStatus != "string") {
@@ -24,6 +25,12 @@ send.post("/update", (req, res) => {
             return
     }
 
+    console.log(JSON.stringify(req.body))
+    res.status(200).json()
+})
+
+send.post("/pending", (req, res) => {
+    console.log(JSON.stringify(req.rawHeaders))
     console.log(JSON.stringify(req.body))
     res.status(200).json()
 })
