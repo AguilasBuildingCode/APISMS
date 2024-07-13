@@ -1,4 +1,4 @@
-import Config, { EnvTypes } from "./config";
+import Config, { EnvTypes } from "./config/config";
 import morgan from "morgan";
 import helmet from "helmet";
 import https from "https";
@@ -6,6 +6,7 @@ import http from "http";
 import express from "express";
 import { Server } from "socket.io"
 import { apis, apisPath } from "./routes/apis/apis";
+import { auth, authPath } from "./routes/auth/auth";
 
 const config = Config.getInstance();
 config
@@ -33,6 +34,7 @@ app.use(
 app.use(helmet());
 
 app.use(apisPath, apis);
+app.use(authPath, auth);
 
 if (config.getEnv() === EnvTypes.PROD) {
   io.attach(https

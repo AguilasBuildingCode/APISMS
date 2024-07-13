@@ -1,3 +1,4 @@
+import uuid
 import os
 
 node_env = os.environ['NODE_ENV']
@@ -16,7 +17,8 @@ if node_env != None and node_env != '':
         if not os.path.exists(env_file_path):
             file = open(env_file_path, 'w+')
             file.write('PORT_API_HTTP=80\n')
-            file.write('PORT_API_HTTPS=443')
+            file.write('PORT_API_HTTPS=443\n')
+            file.write(f'JWT_SECRET={uuid.uuid4()}')
             file.close()
 else:
     print('NODE_ENV not found')

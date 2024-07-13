@@ -9,9 +9,9 @@ export enum EnvTypes {
   PROD = "prod",
 }
 
-const LOCAL_DIR = path.join(__dirname, `./.${EnvTypes.LOCAL}.env`);
-const BETA_DIR = path.join(__dirname, `./.${EnvTypes.BETA}.env`);
-const PROD_DIR = path.join(__dirname, `./.${EnvTypes.PROD}.env`);
+const LOCAL_DIR = path.join(__dirname, `../.${EnvTypes.LOCAL}.env`);
+const BETA_DIR = path.join(__dirname, `../.${EnvTypes.BETA}.env`);
+const PROD_DIR = path.join(__dirname, `../.${EnvTypes.PROD}.env`);
 
 export default class Config {
   private static config: Config = new Config().initConfig();
@@ -22,6 +22,7 @@ export default class Config {
 
   private dotenvConfigOutput?: DotenvConfigOutput;
   private envType?: EnvTypes;
+  private jwtSecret?: string;
 
   private key?: string;
   private cert?: string;
@@ -68,11 +69,12 @@ export default class Config {
         throw new Error("No NODE_ENV found");
     }
 
-    this.key = path.join(__dirname, `./cert/${this.envType}_key.pem`);
-    this.cert = path.join(__dirname, `./cert/${this.envType}_cert.pem`);
+    this.key = path.join(__dirname, `../cert/${this.envType}_key.pem`);
+    this.cert = path.join(__dirname, `../cert/${this.envType}_cert.pem`);
 
     this.portAPIHTTP = Number(process.env.PORT_API_HTTP);
     this.portAPIHTTPS = Number(process.env.PORT_API_HTTPS);
+    this.jwtSecret = process.env.JWT_SECRET
     return this;
   }
 
@@ -95,7 +97,7 @@ export default class Config {
   }
 
   static getStreamLog() {
-    return fs.createWriteStream(path.join(__dirname, "logs/access.log"), {
+    return fs.createWriteStream(path.join(__dirname, "../logs/access.log"), {
       flags: "a",
     });
   }
@@ -105,6 +107,13 @@ export default class Config {
       return this.envType;
     }
     throw new Error("Env type no found");
+  }
+
+  getJWTSecret(): string {
+    if (this.jwtSecret) {
+      return this.jwtSecret
+    }
+    throw new Error("JWT_SECRET not found in env file")
   }
 
   getKey(): string {

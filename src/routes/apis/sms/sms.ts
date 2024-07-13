@@ -1,8 +1,8 @@
 import { v4 as uuid } from "uuid"
 import express from "express";
 import io from "../../..";
-import SMS from "../../../db/models/sms_model";
-import SMStatus from "../../../db/models/sms_status_model";
+import SMS from "./models/sms_model";
+import SMStatus from "./models/sms_status_model";
 import { Op } from "sequelize";
 
 const sms = express.Router();

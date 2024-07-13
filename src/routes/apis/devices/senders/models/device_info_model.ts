@@ -1,5 +1,5 @@
 import { DataTypes, Model } from "sequelize";
-import { smsSequelize } from "../sequelize";
+import { smsSequelize } from "../../../../../db/sequelize";
 
 class DeviceInfo extends Model { }
 

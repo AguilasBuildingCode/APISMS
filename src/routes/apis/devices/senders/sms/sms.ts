@@ -1,8 +1,8 @@
 import express from "express";
 import { v4 as uuid } from "uuid"
-import DeviceInfo from "../../../../../db/models/device_info_model";
-import DevicesStatus from "../../../../../db/models/device_status_model";
-import Issue from "../../../../../db/models/issue_model";
+import DeviceInfo from "../models/device_info_model";
+import DevicesStatus from "../models/device_status_model";
+import Issue from "../models/issue_model";
 
 const sms = express.Router();
 const smsPath = "/sms"

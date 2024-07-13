@@ -21,7 +21,7 @@
     "express": "^4.17.1",
     "helmet": "^4.4.1",
     "https": "^1.0.0",
-    "jsonwebtoken": "^8.5.1",
+    "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
     "sequelize": "^6.37.3",
     "socket.io": "^4.7.5",
