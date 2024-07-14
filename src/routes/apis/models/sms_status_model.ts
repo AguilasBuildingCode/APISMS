@@ -1,5 +1,5 @@
 import { DataTypes, Model } from "sequelize";
-import { smsSequelize } from "../../../../db/sequelize";
+import { smsSequelize } from "../../../db/sequelize";
 
 class SMStatus extends Model { }
 
@@ -9,10 +9,13 @@ SMStatus.init({
         allowNull: false,
         primaryKey: true,
     }, apiSMSId: {
-        type: DataTypes.STRING,
+        type: DataTypes.UUID,
         allowNull: false,
     }, smsId: {
-        type: DataTypes.STRING,
+        type: DataTypes.UUID,
+        allowNull: false,
+    }, apiSMSidDevice: {
+        type: DataTypes.UUID,
         allowNull: false,
     }, partNumber: {
         type: DataTypes.TINYINT,

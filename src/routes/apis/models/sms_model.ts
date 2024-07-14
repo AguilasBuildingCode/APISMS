@@ -1,5 +1,5 @@
 import { DataTypes, Model } from "sequelize";
-import { smsSequelize } from "../../../../db/sequelize";
+import { smsSequelize } from "../../../db/sequelize";
 
 class SMS extends Model { }
 
@@ -8,8 +8,13 @@ SMS.init({
         type: DataTypes.UUID,
         primaryKey: true,
         allowNull: false,
-    },
-    countryCode: {
+    }, apiSMSidDevice: {
+        type: DataTypes.UUID,
+    }, deviceNotified: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+        allowNull: false,
+    }, countryCode: {
         type: DataTypes.STRING(5),
         allowNull: false,
         validate: {
@@ -28,10 +33,10 @@ SMS.init({
         validate: {
             min: 1,
         }
-    }, date: {
+    }, createdAt: {
         type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW,
         allowNull: false,
-        defaultValue: DataTypes.NOW
     },
 }, {
     sequelize: smsSequelize,

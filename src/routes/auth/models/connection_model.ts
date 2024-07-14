@@ -11,6 +11,10 @@ Connection.init({
     }, userId: {
         type: DataTypes.UUID,
         allowNull: false,
+    }, deleted: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+        allowNull: false,
     }, expireAt: {
         type: DataTypes.NUMBER,
         allowNull: false,

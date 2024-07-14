@@ -8,6 +8,7 @@ import { Server } from "socket.io"
 import { apis, apisPath } from "./routes/apis/apis";
 import { auth, authPath } from "./routes/auth/auth";
 import authMiddleware from "./routes/middlewares/auth_middleware";
+import assignmentSMSPendingCron from "./cron/devices_works";
 
 const config = Config.getInstance();
 config
@@ -48,10 +49,12 @@ if (config.getEnv() === EnvTypes.PROD) {
     )
     .listen(portAPIHTTPS, () => {
       console.log(`Server run on port: ${portAPIHTTPS}`);
+      assignmentSMSPendingCron.start()
     }));
 } else {
   io.attach(http.createServer(app).listen(portAPIHTTP, () => {
     console.log(`Server run on port: ${portAPIHTTP}`);
+    assignmentSMSPendingCron.start()
   }));
 }
 

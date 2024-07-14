@@ -50,7 +50,7 @@ auth.post("/login", loginMiddleware, async (req, res) => {
         const lastConn = await Connection.findOne({
             attributes: ["expireAt"],
             where: {
-                userId
+                userId, deleted: false
             },
             order: [
                 ['expireAt', 'DESC']
@@ -64,9 +64,27 @@ auth.post("/login", loginMiddleware, async (req, res) => {
 
         const conn = await jwt.sing(user)
         res.status(200).json(conn)
-    } catch (e) {
-        res.status(500).json({ detail: JSON.stringify(e) })
+    } catch (e: any) {
         console.log(e)
+        res.status(500).json({ detail: e.message })
+    }
+})
+
+auth.post("/logout", async (req, res) => {
+    const token = req.header("Authorization")
+
+    try {
+        const [logout] = await Connection.update({
+            deleted: true
+        }, {
+            where: {
+                token
+            }
+        })
+        res.status(200).json({ logout: logout > 0 })
+    } catch (e: any) {
+        console.log(e)
+        res.status(500).json({ detail: e.message })
     }
 })
 
