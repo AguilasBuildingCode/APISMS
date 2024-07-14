@@ -9,10 +9,6 @@ const authPath = "/auth"
 
 auth.post("/login",
     (req, res, next) => {
-
-        console.log(JSON.stringify(req.body))
-        console.log(JSON.stringify(req.rawHeaders))
-
         const { userId, userName, password } = req.body
         if (typeof userId == "string" && typeof userName == "string" && typeof password == "string") {
             next()
@@ -33,16 +29,13 @@ auth.post("/login",
 
         try {
             const tokenRes = jwt.verify(splitedToke[1])
-            req.body = { userId: tokenRes.getDataValue("userId"), userName: tokenRes.getDataValue("userName"), password: tokenRes.getDataValue("password") }
+            req.body = { ...tokenRes, ...req.body }
             next()
         } catch (e) {
             console.error(e)
             res.status(401).json({ detail: JSON.stringify(e) })
         }
     }, async (req, res) => {
-
-        console.log(JSON.stringify(req.body))
-
         const { userId, userName, password } = req.body
         try {
             const user = await Users.findByPk(userId)

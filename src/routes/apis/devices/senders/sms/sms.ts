@@ -8,12 +8,24 @@ const sms = express.Router();
 const smsPath = "/sms"
 
 sms.put("/register", async (req, res) => {
-    const { model, id, sdk, manufacturer, brand, userName, type, appVersionCode, board, host, fingerPrint, appVersionName, carrierIdFromSimMccMnc, simCarrierId, simCarrierIdName, simState, simOperator, simCountryIso, simOperatorName, simSpecificCarrierIdName } = req.body
+    const { userId, model, id, sdk, manufacturer, brand, userName, type, appVersionCode, board, host, fingerPrint, appVersionName, carrierIdFromSimMccMnc, simCarrierId, simCarrierIdName, simState, simOperator, simCountryIso, simOperatorName, simSpecificCarrierIdName } = req.body
     if (typeof model != "string" && typeof id != "string" && typeof sdk != "number" && typeof manufacturer != "string" && typeof brand != "string" && typeof userName != "string" && typeof type != "string" && typeof appVersionCode != "string" && typeof board != "string" && typeof host != "string" && typeof fingerPrint != "string" && typeof appVersionName != "string") {
         res.status(400).json({ detail: "Missing and/or invalid model, id, sdk, manufacturer, brand, userName, type, appVersionCode, board, host, fingerPrint, appVersionName, simState, simOperator, simCountryIso, simOperatorName" })
         return
     }
-    const deviceInfo = await DeviceInfo.create({ apiSMSidDevice: uuid(), model, id, sdk, manufacturer, brand, userName, type, appVersionCode, board, host, fingerPrint, appVersionName, carrierIdFromSimMccMnc, simCarrierId, simCarrierIdName, simState, simOperator, simCountryIso, simOperatorName, simSpecificCarrierIdName })
+
+    const devices = await DeviceInfo.findAll({
+        where: {
+            userId, model, id, sdk, manufacturer, brand, userName, type, appVersionCode, board, host, fingerPrint, appVersionName, carrierIdFromSimMccMnc, simCarrierId, simCarrierIdName, simState, simOperator, simCountryIso, simOperatorName, simSpecificCarrierIdName
+        }
+    })
+
+    if (devices.length > 0) {
+        res.status(400).json({ detail: "Device already registred" })
+        return
+    }
+
+    const deviceInfo = await DeviceInfo.create({ apiSMSidDevice: uuid(), userId, model, id, sdk, manufacturer, brand, userName, type, appVersionCode, board, host, fingerPrint, appVersionName, carrierIdFromSimMccMnc, simCarrierId, simCarrierIdName, simState, simOperator, simCountryIso, simOperatorName, simSpecificCarrierIdName })
     await DevicesStatus.create({ apiSMSidDevice: deviceInfo.getDataValue("apiSMSidDevice"), status: "OFFLINE" })
     res.status(200).json(deviceInfo)
 })
@@ -25,16 +37,20 @@ sms.post("/online", async (req, res) => {
         return
     }
 
-    const deviceStatus = await DevicesStatus.update(
-        { status: "ONLINE" },
-        {
-            where: {
-                apiSMSidDevice
+    try {
+        const deviceStatus = await DevicesStatus.update(
+            { status: "ONLINE" },
+            {
+                where: {
+                    apiSMSidDevice
+                }
             }
-        }
-    )
-
-    res.status(200).json({ online: deviceStatus.length > 0 })
+        )
+        res.status(200).json({ online: deviceStatus.length > 0 })
+    } catch (e: any) {
+        console.error(e)
+        res.status(500).json({ detail: e.message })
+    }
 })
 
 sms.post("/offline", async (req, res) => {
@@ -44,16 +60,21 @@ sms.post("/offline", async (req, res) => {
         return
     }
 
-    const deviceStatus = await DevicesStatus.update(
-        { status: "OFFLINE" },
-        {
-            where: {
-                apiSMSidDevice
+    try {
+        const deviceStatus = await DevicesStatus.update(
+            { status: "OFFLINE" },
+            {
+                where: {
+                    apiSMSidDevice
+                }
             }
-        }
-    )
+        )
 
-    res.status(200).json({ offline: deviceStatus.length > 0 })
+        res.status(200).json({ offline: deviceStatus.length > 0 })
+    } catch (e: any) {
+        console.error(e)
+        res.status(500).json({ detail: e.message })
+    }
 })
 
 sms.post("/issue", async (req, res) => {
@@ -68,8 +89,14 @@ sms.post("/issue", async (req, res) => {
         res.status(400).json({ detail: "Missining and/or invalid code" })
         return
     }
-    const issue = await Issue.create({ apiSMSidIssue: uuid(), apiSMSidDevice, code, message, detail, path, isBodyEmpty })
-    res.status(200).json(issue)
+
+    try {
+        const issue = await Issue.create({ apiSMSidIssue: uuid(), apiSMSidDevice, code, message, detail, path, isBodyEmpty })
+        res.status(200).json(issue)
+    } catch (e: any) {
+        console.log(e)
+        res.status(500).json({ detail: e.message })
+    }
 })
 
 export { sms, smsPath }

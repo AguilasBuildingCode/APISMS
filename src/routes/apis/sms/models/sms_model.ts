@@ -20,8 +20,7 @@ SMS.init({
         type: DataTypes.STRING(10),
         allowNull: false,
         validate: {
-            min: 10,
-            max: 10,
+            isNumeric: true,
         }
     }, message: {
         type: DataTypes.STRING,

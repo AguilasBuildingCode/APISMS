@@ -8,77 +8,60 @@ DeviceInfo.init({
         type: DataTypes.UUID,
         primaryKey: true,
         allowNull: false,
-    },
-    id: {
+    }, userId: {
+        type: DataTypes.UUID,
+        allowNull: false,
+    }, id: {
         type: DataTypes.STRING,
         allowNull: false
-    },
-    model: {
+    }, model: {
         type: DataTypes.STRING,
         allowNull: false
-    },
-    sdk: {
+    }, sdk: {
         type: DataTypes.TINYINT,
         allowNull: false
-    },
-    manufacturer: {
+    }, manufacturer: {
         type: DataTypes.STRING,
         allowNull: false
-    },
-    brand: {
+    }, brand: {
         type: DataTypes.STRING,
         allowNull: false
-    },
-    userName: {
+    }, userName: {
         type: DataTypes.STRING,
         allowNull: false
-    },
-    type: {
+    }, type: {
         type: DataTypes.STRING,
         allowNull: false
-    },
-    appVersionCode: {
+    }, appVersionCode: {
         type: DataTypes.STRING,
         allowNull: false
-    },
-    board: {
+    }, board: {
         type: DataTypes.STRING,
         allowNull: false
-    },
-    host: {
+    }, host: {
         type: DataTypes.STRING,
         allowNull: false
-    },
-    fingerPrint: {
+    }, fingerPrint: {
         type: DataTypes.STRING,
         allowNull: false
-    },
-    appVersionName: {
+    }, appVersionName: {
         type: DataTypes.STRING,
         allowNull: false
-    },
-    carrierIdFromSimMccMnc: {
+    }, carrierIdFromSimMccMnc: {
         type: DataTypes.STRING,
-    },
-    simCarrierId: {
+    }, simCarrierId: {
         type: DataTypes.STRING,
-    },
-    simCarrierIdName: {
+    }, simCarrierIdName: {
         type: DataTypes.STRING,
-    },
-    simState: {
+    }, simState: {
         type: DataTypes.TINYINT,
-    },
-    simOperator: {
+    }, simOperator: {
         type: DataTypes.STRING,
-    },
-    simCountryIso: {
+    }, simCountryIso: {
         type: DataTypes.STRING,
-    },
-    simOperatorName: {
+    }, simOperatorName: {
         type: DataTypes.STRING,
-    },
-    simSpecificCarrierIdName: {
+    }, simSpecificCarrierIdName: {
         type: DataTypes.STRING,
     },
 }, {
