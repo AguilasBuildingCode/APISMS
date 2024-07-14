@@ -7,6 +7,7 @@ import express from "express";
 import { Server } from "socket.io"
 import { apis, apisPath } from "./routes/apis/apis";
 import { auth, authPath } from "./routes/auth/auth";
+import authMiddleware from "./routes/middlewares/auth_middleware";
 
 const config = Config.getInstance();
 config
@@ -33,8 +34,8 @@ app.use(
 );
 app.use(helmet());
 
-app.use(apisPath, apis);
 app.use(authPath, auth);
+app.use(apisPath, authMiddleware, apis);
 
 if (config.getEnv() === EnvTypes.PROD) {
   io.attach(https
