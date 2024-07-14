@@ -1,8 +1,9 @@
 import { RequestHandler } from "express"
 import JWT from "../../jwt/jwt"
+import Connection from "../auth/models/connection_model"
 
 const jwt = new JWT()
-const authMiddleware: RequestHandler<any> = (req, res, next) => {
+const authMiddleware: RequestHandler<any> = async (req, res, next) => {
     const token = req.header("Authorization")
     if (typeof token != "string" || !token.startsWith("Bearer")) {
         res.status(400).json({ detail: "Missing and/or invalid token" })
@@ -16,8 +17,26 @@ const authMiddleware: RequestHandler<any> = (req, res, next) => {
     }
 
     try {
-        const tokenRes = jwt.verify(splitedToke[1])
-        req.body = { ...tokenRes, ...req.body }
+        const currentConn = await Connection.findOne({
+            attributes: ["expireAt"],
+            where: {
+                token: splitedToke[1],
+                deleted: false
+            }
+        })
+
+        if (!currentConn) {
+            res.status(404).json({ detail: "Invalid token" })
+            return
+        }
+
+        if (jwt.isConnNotValid(currentConn)) {
+            res.status(401).json({ detail: "Your connection expired", })
+            return
+        }
+
+        const user = jwt.verify(splitedToke[1])
+        req.body = { ...user, token: splitedToke[1], currentConn, ...req.body }
         next()
     } catch (e: any) {
         console.error(e)

@@ -6,56 +6,62 @@ import { Op } from "sequelize"
 import io from ".."
 
 const assignmentSMSPendingCron = cron.schedule('*/1 * * * *', async () => {
-    const smsPendings = await SMS.findAll({
-        where: {
-            apiSMSidDevice: null
-        }
-    })
-
-    console.log(JSON.stringify({ smsPendings }))
-
-    if (smsPendings.length <= 0) {
-        return
-    }
-
-    smsPendings.forEach(async (sms) => {
-        const availableSenders = await DevicesStatus.findAll({
-            attributes: ["apiSMSidDevice"],
+    try {
+        const smsPendings = await SMS.findAll({
             where: {
-                status: "ONLINE"
+                apiSMSidDevice: null
             }
         })
 
-        console.log(JSON.stringify({ availableSenders }))
+        console.log(JSON.stringify({ smsPendings }))
 
-        if (availableSenders.length <= 0) {
-            // ToDo Notify
+        if (smsPendings.length <= 0) {
             return
         }
 
-        const senderWork = await SendersSMSWork.findOne({
-            attributes: ["apiSMSidDevice"],
-            where: {
-                [Op.or]: [{ apiSMSidDevice: availableSenders.map(availableSender => availableSender.getDataValue("apiSMSidDevice")) }]
-            },
-            order: [
-                ["smsPending", "ASC"]
-            ]
-        })
-
-        console.log(JSON.stringify({ senderWork }))
-
-        if (!senderWork) {
-            return
-        }
-
-        const apiSMSidDevice = senderWork.getDataValue("apiSMSidDevice")
-        if (io.emit(`${apiSMSidDevice}-sms-to-send`, sms)) {
-            sms.update({
-                apiSMSidDevice,
+        smsPendings.forEach(async (sms) => {
+            const availableSenders = await DevicesStatus.findAll({
+                attributes: ["apiSMSidDevice"],
+                where: {
+                    status: "ONLINE"
+                }
             })
-        }
-    })
+
+            if (availableSenders.length <= 0) {
+                // ToDo Notify
+                return
+            }
+
+            const senderWork = await SendersSMSWork.findOne({
+                attributes: ["apiSMSidDevice", "smsPending"],
+                where: {
+                    [Op.or]: [{ apiSMSidDevice: availableSenders.map(availableSender => availableSender.getDataValue("apiSMSidDevice")) }]
+                },
+                order: [
+                    ["smsPending", "ASC"],
+                    ["smsFailed", "ASC"],
+                    ["smsDelivered", "DESC"]
+                ]
+            })
+
+            if (!senderWork) {
+                return
+            }
+
+            await senderWork.update({
+                smsPending: Number(senderWork.getDataValue("smsPending")) + 1
+            })
+            const apiSMSidDevice = senderWork.getDataValue("apiSMSidDevice")
+            if (io.emit(`${apiSMSidDevice}-sms-to-send`, sms)) {
+                sms.update({
+                    apiSMSidDevice,
+                })
+            }
+
+        })
+    } catch (e) {
+        console.error(e)
+    }
 }, {
     scheduled: true,
 })

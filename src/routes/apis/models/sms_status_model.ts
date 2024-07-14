@@ -33,7 +33,7 @@ SMStatus.init({
     },
 }, {
     sequelize: smsSequelize,
-    modelName: "smsStatus",
+    modelName: "sms_status",
 }
 )
 

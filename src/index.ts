@@ -6,7 +6,7 @@ import http from "http";
 import express from "express";
 import { Server } from "socket.io"
 import { apis, apisPath } from "./routes/apis/apis";
-import { auth, authPath } from "./routes/auth/auth";
+import { auth, authPath, loginMiddleware } from "./routes/auth/auth";
 import authMiddleware from "./routes/middlewares/auth_middleware";
 import assignmentSMSPendingCron from "./cron/devices_works";
 
@@ -35,7 +35,7 @@ app.use(
 );
 app.use(helmet());
 
-app.use(authPath, auth);
+app.use(authPath, loginMiddleware, auth);
 app.use(apisPath, authMiddleware, apis);
 
 if (config.getEnv() === EnvTypes.PROD) {

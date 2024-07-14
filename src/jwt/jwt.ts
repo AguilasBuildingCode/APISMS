@@ -21,9 +21,9 @@ export default class JWT {
     }
 
     isConnValid(lastConn: Connection): boolean {
-        const expireAt = Math.floor(Date.now() / 1000)
-        const lastConnExpireAt = Number(lastConn.getDataValue("expireAt")) - 300 // less 5 min
-        return expireAt > lastConnExpireAt
+        const nowLess5Min = Math.floor(Date.now() / 1000) - 300 // Less 5 min
+        const lastConnExpireAt = Number(lastConn.getDataValue("expireAt"))
+        return lastConnExpireAt > nowLess5Min
     }
 
     isConnNotValid(lastConn: Connection): boolean {

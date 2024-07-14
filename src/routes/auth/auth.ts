@@ -8,9 +8,26 @@ const jwt = new JWT()
 const auth = express.Router();
 const authPath = "/auth"
 
-const loginMiddleware: RequestHandler<any> = (req, res, next) => {
+const loginMiddleware: RequestHandler<any> = async (req, res, next) => {
     const { userId, userName, password } = req.body
     if (typeof userId == "string" && typeof userName == "string" && typeof password == "string") {
+
+        const currentConn = await Connection.findOne({
+            attributes: ["expireAt"],
+            where: {
+                userId,
+                deleted: false,
+            },
+            order: [
+                ["expireAt", "DESC"]
+            ]
+        })
+
+        if (currentConn && jwt.isConnValid(currentConn)) {
+            const expireAt = currentConn.getDataValue("expireAt")
+            res.status(401).json({ detail: "Your connection already is valid", expireAt, retryAt: expireAt - 300 })
+            return
+        }
         next()
         return
     }
@@ -18,9 +35,16 @@ const loginMiddleware: RequestHandler<any> = (req, res, next) => {
     authMiddleware(req, res, next)
 }
 
-auth.post("/login", loginMiddleware, async (req, res) => {
-    const { userId, userName, password } = req.body
+auth.post("/login", async (req, res) => {
+    console.log(JSON.stringify({ body: req.body }))
+    const { userId, userName, password, currentConn } = req.body
     try {
+        if (currentConn && jwt.isConnValid(currentConn)) {
+            const expireAt = currentConn.getDataValue("expireAt")
+            res.status(401).json({ detail: "Your connection already is valid", expireAt, retryAt: expireAt - 300 })
+            return
+        }
+
         const user = await Users.findByPk(userId)
 
         if (!user) {
@@ -47,21 +71,6 @@ auth.post("/login", loginMiddleware, async (req, res) => {
             return
         }
 
-        const lastConn = await Connection.findOne({
-            attributes: ["expireAt"],
-            where: {
-                userId, deleted: false
-            },
-            order: [
-                ['expireAt', 'DESC']
-            ]
-        })
-
-        if (lastConn && jwt.isConnNotValid(lastConn)) {
-            res.status(401).json({ detail: "Your connection already is valid", expireAt: Number(lastConn.getDataValue("expireAt")), retryAt: Number(lastConn.getDataValue("expireAt")) - 300 })
-            return
-        }
-
         const conn = await jwt.sing(user)
         res.status(200).json(conn)
     } catch (e: any) {
@@ -70,8 +79,12 @@ auth.post("/login", loginMiddleware, async (req, res) => {
     }
 })
 
+auth.post("/valid", async (_, res) => {
+    res.status(200).send({})
+})
+
 auth.post("/logout", async (req, res) => {
-    const token = req.header("Authorization")
+    const { token } = req.body
 
     try {
         const [logout] = await Connection.update({
@@ -81,11 +94,16 @@ auth.post("/logout", async (req, res) => {
                 token
             }
         })
-        res.status(200).json({ logout: logout > 0 })
+
+        if (logout > 0) {
+            res.status(200).send({})
+            return
+        }
+        res.status(404).json({ detail: "Invalid token" })
     } catch (e: any) {
         console.log(e)
         res.status(500).json({ detail: e.message })
     }
 })
 
-export { auth, authPath }
+export { auth, authPath, loginMiddleware }

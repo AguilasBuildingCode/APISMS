@@ -54,7 +54,13 @@ sms.post("/online", async (req, res) => {
                 }
             }
         )
-        res.status(200).json({ online: deviceStatus > 0 })
+
+        if (deviceStatus > 0) {
+            res.status(200).json({})
+            return
+        }
+
+        res.status(404).json({ detail: "Invalid device" })
     } catch (e: any) {
         console.error(e)
         res.status(500).json({ detail: e.message })
@@ -101,7 +107,13 @@ sms.put("/received", async (req, res) => {
                 [Op.and]: [{ apiSMSId }, { apiSMSidDevice }]
             }
         })
-        res.status(200).json({ received: isReceived > 0 })
+
+        if (isReceived > 0) {
+            res.status(200).json({})
+            return
+        }
+
+        res.status(404).json({ detail: "Invalid apiSMSId" })
     } catch (e: any) {
         res.status(500).json({ detail: e.message })
     }
@@ -118,6 +130,30 @@ sms.post("/update", async (req, res) => {
 
     try {
         const smsStatus = await SMStatus.create({ statusId: uuid(), apiSMSId, smsId, apiSMSidDevice, partNumber, totalParts, newStatus })
+
+        const [currentWork] = await SendersSMSWork.findOrCreate({
+            where: {
+                apiSMSidDevice
+            }
+        })
+        switch (newStatus) {
+            case "SEND":
+                currentWork.update({
+                    smsSend: currentWork.getDataValue("smsSend") + 1
+                })
+                break
+            case "DELIVERED":
+                currentWork.update({
+                    smsDelivered: currentWork.getDataValue("smsDelivered") + 1
+                })
+                break
+            case "FAIL":
+                currentWork.update({
+                    smsFailed: currentWork.getDataValue("smsFailed") + 1
+                })
+                break
+        }
+
         res.status(200).json(smsStatus)
     } catch (e: any) {
         res.status(500).json({ detail: e.message })
@@ -141,7 +177,12 @@ sms.post("/offline", async (req, res) => {
             }
         )
 
-        res.status(200).json({ offline: deviceStatus > 0 })
+        if (deviceStatus > 0) {
+            res.status(200).send({})
+            return
+        }
+
+        res.status(404).json({ detail: "Invalid device" })
     } catch (e: any) {
         console.error(e)
         res.status(500).json({ detail: e.message })
