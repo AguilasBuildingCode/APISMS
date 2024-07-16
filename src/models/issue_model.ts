@@ -1,5 +1,5 @@
 import { DataTypes, Model } from "sequelize";
-import { smsSequelize } from "../../../db/sequelize";
+import { smsSequelize } from "../db/sequelize";
 
 class Issue extends Model { }
 
@@ -8,9 +8,15 @@ Issue.init({
         type: DataTypes.UUID,
         primaryKey: true,
         allowNull: false,
-    }, apiSMSidDevice: {
+        validate: {
+            isUUID: 4
+        }
+    }, deviceKindOfId: {
         type: DataTypes.UUID,
         allowNull: false,
+        validate: {
+            isUUID: 4
+        }
     }, code: {
         type: DataTypes.SMALLINT,
         allowNull: false

@@ -1,21 +1,22 @@
 import express, { RequestHandler } from "express";
 import JWT from "../../jwt/jwt";
-import Users from "./models/users_model";
-import Connection from "./models/connection_model";
-import authMiddleware from "../middlewares/auth_middleware";
+import Connection from "../../models/connection_model";
+import authValidateMiddleware from "../../middlewares/auth_validate_middleware";
+import Users from "../../models/users_model";
+import Devices from "../../models/devices_model";
 
 const jwt = new JWT()
 const auth = express.Router();
 const authPath = "/auth"
 
-const loginMiddleware: RequestHandler<any> = async (req, res, next) => {
-    const { userId, userName, password } = req.body
-    if (typeof userId == "string" && typeof userName == "string" && typeof password == "string") {
+const authMiddleware: RequestHandler<any> = async (req, res, next) => {
+    const { agentId, userName, password } = req.body
+    if (typeof agentId == "string" && typeof userName == "string" && typeof password == "string") {
 
         const currentConn = await Connection.findOne({
             attributes: ["expireAt"],
             where: {
-                userId,
+                agentId,
                 deleted: false,
             },
             order: [
@@ -32,12 +33,12 @@ const loginMiddleware: RequestHandler<any> = async (req, res, next) => {
         return
     }
 
-    authMiddleware(req, res, next)
+    authValidateMiddleware(req, res, next)
 }
 
 auth.post("/login", async (req, res) => {
     console.log(JSON.stringify({ body: req.body }))
-    const { userId, userName, password, currentConn } = req.body
+    const { agentId, userName, password, currentConn } = req.body
     try {
         if (currentConn && jwt.isConnValid(currentConn)) {
             const expireAt = currentConn.getDataValue("expireAt")
@@ -45,33 +46,29 @@ auth.post("/login", async (req, res) => {
             return
         }
 
-        const user = await Users.findByPk(userId)
+        const agent = (await Users.findByPk(agentId)) ?? (await Devices.findByPk(agentId))
 
-        if (!user) {
-            res.status(401).json({ detail: "Invalid userId and/or userName and/or password" })
+        if (!agent) {
+            res.status(401).json({ detail: "Invalid agentId and/or userName and/or password" })
             return
         }
 
-        if (Boolean(user.getDataValue("locked"))) {
+        if (Boolean(agent.getDataValue("locked"))) {
             res.status(401).json({ detail: "User locked by exced attempt login limit" })
             return
         }
 
-        if (userName != user.getDataValue("userName") || password != user.getDataValue("password")) {
-            const attemptsLogin = Number(user.getDataValue("attemptsLogin")) + 1
-            Users.update({
+        if (userName != agent.getDataValue("userName") || password != agent.getDataValue("password")) {
+            const attemptsLogin = Number(agent.getDataValue("attemptsLogin")) + 1
+            agent.update({
                 attemptsLogin,
                 locked: attemptsLogin >= 3,
-            }, {
-                where: {
-                    userId
-                }
             })
             res.status(401).json({ detail: "Invalid userId and/or userName and/or password" })
             return
         }
 
-        const conn = await jwt.sing(user)
+        const conn = await jwt.sing(agent)
         res.status(200).json(conn)
     } catch (e: any) {
         console.log(e)
@@ -106,4 +103,4 @@ auth.post("/logout", async (req, res) => {
     }
 })
 
-export { auth, authPath, loginMiddleware }
+export { auth, authPath, authMiddleware }

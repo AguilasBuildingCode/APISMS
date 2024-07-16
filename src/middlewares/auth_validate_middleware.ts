@@ -1,9 +1,9 @@
 import { RequestHandler } from "express"
-import JWT from "../../jwt/jwt"
-import Connection from "../auth/models/connection_model"
+import JWT from "../jwt/jwt"
+import Connection from "../models/connection_model"
 
 const jwt = new JWT()
-const authMiddleware: RequestHandler<any> = async (req, res, next) => {
+const authValidateMiddleware: RequestHandler<any> = async (req, res, next) => {
     const token = req.header("Authorization")
     if (typeof token != "string" || !token.startsWith("Bearer")) {
         res.status(400).json({ detail: "Missing and/or invalid token" })
@@ -26,7 +26,7 @@ const authMiddleware: RequestHandler<any> = async (req, res, next) => {
         })
 
         if (!currentConn) {
-            res.status(404).json({ detail: "Invalid token" })
+            res.status(401).json({ detail: "Invalid token" })
             return
         }
 
@@ -35,8 +35,8 @@ const authMiddleware: RequestHandler<any> = async (req, res, next) => {
             return
         }
 
-        const user = jwt.verify(splitedToke[1])
-        req.body = { ...user, token: splitedToke[1], currentConn, ...req.body }
+        const agent = jwt.verify(splitedToke[1])
+        req.body = { ...agent, token: splitedToke[1], currentConn, ...req.body }
         next()
     } catch (e: any) {
         console.error(e)
@@ -44,4 +44,4 @@ const authMiddleware: RequestHandler<any> = async (req, res, next) => {
     }
 }
 
-export default authMiddleware
+export default authValidateMiddleware

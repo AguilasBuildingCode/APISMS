@@ -1,7 +1,7 @@
 import cron from "node-cron"
-import SMS from "../routes/apis/models/sms_model"
-import SendersSMSWork from "../routes/apis/models/senders_sms_works_model"
-import DevicesStatus from "../routes/apis/models/device_status_model"
+import SMS from "../models/sms_model"
+import SendersSMSWork from "../models/senders_sms_works_model"
+import SMSenderStatus from "../models/sms_sender_status_model"
 import { Op } from "sequelize"
 import io from ".."
 
@@ -9,7 +9,7 @@ const assignmentSMSPendingCron = cron.schedule('*/1 * * * *', async () => {
     try {
         const smsPendings = await SMS.findAll({
             where: {
-                apiSMSidDevice: null
+                deviceKindOfId: null
             }
         })
 
@@ -20,8 +20,8 @@ const assignmentSMSPendingCron = cron.schedule('*/1 * * * *', async () => {
         }
 
         smsPendings.forEach(async (sms) => {
-            const availableSenders = await DevicesStatus.findAll({
-                attributes: ["apiSMSidDevice"],
+            const availableSenders = await SMSenderStatus.findAll({
+                attributes: ["deviceKindOfId"],
                 where: {
                     status: "ONLINE"
                 }
@@ -33,9 +33,9 @@ const assignmentSMSPendingCron = cron.schedule('*/1 * * * *', async () => {
             }
 
             const senderWork = await SendersSMSWork.findOne({
-                attributes: ["apiSMSidDevice", "smsPending"],
+                attributes: ["deviceKindOfId", "smsPending"],
                 where: {
-                    [Op.or]: [{ apiSMSidDevice: availableSenders.map(availableSender => availableSender.getDataValue("apiSMSidDevice")) }]
+                    [Op.or]: [{ deviceKindOfId: availableSenders.map(availableSender => availableSender.getDataValue("deviceKindOfId")) }]
                 },
                 order: [
                     ["smsPending", "ASC"],
@@ -51,10 +51,10 @@ const assignmentSMSPendingCron = cron.schedule('*/1 * * * *', async () => {
             await senderWork.update({
                 smsPending: Number(senderWork.getDataValue("smsPending")) + 1
             })
-            const apiSMSidDevice = senderWork.getDataValue("apiSMSidDevice")
-            if (io.emit(`${apiSMSidDevice}-sms-to-send`, sms)) {
+            const deviceKindOfId = senderWork.getDataValue("deviceKindOfId")
+            if (io.emit(`${deviceKindOfId}-sms-to-send`, sms)) {
                 sms.update({
-                    apiSMSidDevice,
+                    deviceKindOfId,
                 })
             }
 

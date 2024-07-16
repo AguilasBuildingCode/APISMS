@@ -1,5 +1,5 @@
 import { DataTypes, Model } from "sequelize";
-import { smsSequelize } from "../../../db/sequelize";
+import { smsSequelize } from "../db/sequelize";
 
 class SMS extends Model { }
 
@@ -8,8 +8,14 @@ SMS.init({
         type: DataTypes.UUID,
         primaryKey: true,
         allowNull: false,
-    }, apiSMSidDevice: {
+        validate: {
+            isUUID: 4
+        }
+    }, deviceKindOfId: {
         type: DataTypes.UUID,
+        validate: {
+            isUUID: 4
+        }
     }, deviceNotified: {
         type: DataTypes.BOOLEAN,
         defaultValue: false,

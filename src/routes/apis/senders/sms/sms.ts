@@ -1,56 +1,55 @@
 import express from "express";
 import { v4 as uuid } from "uuid"
-import DeviceInfo from "../../../models/device_info_model";
-import DevicesStatus from "../../../models/device_status_model";
-import Issue from "../../../models/issue_model";
-import SendersSMSWork from "../../../models/senders_sms_works_model";
-import SMS from "../../../models/sms_model";
+import SMSenderInfo from "../../../../models/sms_sender_info_model";
+import SMSenderStatus from "../../../../models/sms_sender_status_model";
+import Issue from "../../../../models/issue_model";
+import SendersSMSWork from "../../../../models/senders_sms_works_model";
+import SMS from "../../../../models/sms_model";
 import { Op } from "sequelize";
-import SMStatus from "../../../models/sms_status_model";
+import SMStatus from "../../../../models/sms_status_model";
 
 const sms = express.Router();
 const smsPath = "/sms"
 
 sms.put("/register", async (req, res) => {
-    const { userId, model, id, sdk, manufacturer, brand, userName, type, appVersionCode, board, host, fingerPrint, appVersionName, carrierIdFromSimMccMnc, simCarrierId, simCarrierIdName, simState, simOperator, simCountryIso, simOperatorName, simSpecificCarrierIdName } = req.body
-    if (typeof model != "string" && typeof id != "string" && typeof sdk != "number" && typeof manufacturer != "string" && typeof brand != "string" && typeof userName != "string" && typeof type != "string" && typeof appVersionCode != "string" && typeof board != "string" && typeof host != "string" && typeof fingerPrint != "string" && typeof appVersionName != "string") {
+    const { deviceKindOfId, userId, model, id, sdk, manufacturer, brand, userName, type, appVersionCode, board, host, fingerPrint, appVersionName, carrierIdFromSimMccMnc, simCarrierId, simCarrierIdName, simState, simOperator, simCountryIso, simOperatorName, simSpecificCarrierIdName } = req.body
+    if (typeof deviceKindOfId != "string" || typeof model != "string" || typeof id != "string" || typeof sdk != "number" || typeof manufacturer != "string" || typeof brand != "string" || typeof userName != "string" || typeof type != "string" || typeof appVersionCode != "string" || typeof board != "string" || typeof host != "string" || typeof fingerPrint != "string" || typeof appVersionName != "string") {
         res.status(400).json({ detail: "Missing and/or invalid model, id, sdk, manufacturer, brand, userName, type, appVersionCode, board, host, fingerPrint, appVersionName, simState, simOperator, simCountryIso, simOperatorName" })
         return
     }
 
-    const devices = await DeviceInfo.findAll({
+    const smsSender = await SMSenderInfo.findAll({
         where: {
-            userId, model, id, sdk, manufacturer, brand, userName, type, appVersionCode, board, host, fingerPrint, appVersionName, carrierIdFromSimMccMnc, simCarrierId, simCarrierIdName, simState, simOperator, simCountryIso, simOperatorName, simSpecificCarrierIdName
+            deviceKindOfId, userId, model, id, sdk, manufacturer, brand, userName, type, appVersionCode, board, host, fingerPrint, appVersionName, carrierIdFromSimMccMnc, simCarrierId, simCarrierIdName, simState, simOperator, simCountryIso, simOperatorName, simSpecificCarrierIdName
         }
     })
 
-    if (devices.length > 0) {
-        res.status(400).json({ detail: "Device already registred" })
+    if (smsSender.length > 0) {
+        res.status(400).json({ detail: "SMS Sender already registred" })
         return
     }
 
-    const apiSMSidDevice = uuid()
-    const [deviceInfo] = await Promise.all([
-        await DeviceInfo.create({ apiSMSidDevice, userId, model, id, sdk, manufacturer, brand, userName, type, appVersionCode, board, host, fingerPrint, appVersionName, carrierIdFromSimMccMnc, simCarrierId, simCarrierIdName, simState, simOperator, simCountryIso, simOperatorName, simSpecificCarrierIdName }),
-        await DevicesStatus.create({ apiSMSidDevice, status: "OFFLINE" }),
-        await SendersSMSWork.create({ apiSMSidDevice }),
+    await Promise.all([
+        await SMSenderInfo.create({ deviceKindOfId, userId, model, id, sdk, manufacturer, brand, userName, type, appVersionCode, board, host, fingerPrint, appVersionName, carrierIdFromSimMccMnc, simCarrierId, simCarrierIdName, simState, simOperator, simCountryIso, simOperatorName, simSpecificCarrierIdName }),
+        await SMSenderStatus.create({ deviceKindOfId, status: "OFFLINE" }),
+        await SendersSMSWork.create({ deviceKindOfId }),
     ])
-    res.status(200).json(deviceInfo)
+    res.status(200).json({})
 })
 
 sms.post("/online", async (req, res) => {
-    const apiSMSidDevice = req.header("apiSMSidDevice")
-    if (typeof apiSMSidDevice != "string" || apiSMSidDevice == "") {
-        res.status(400).json({ detail: "Missining and/or invalid deviceId" })
+    const { deviceKindOfId } = req.body
+    if (typeof deviceKindOfId != "string" || deviceKindOfId == "") {
+        res.status(400).json({ detail: "Missining and/or invalid deviceKindOfId" })
         return
     }
 
     try {
-        const [deviceStatus] = await DevicesStatus.update(
+        const [deviceStatus] = await SMSenderStatus.update(
             { status: "ONLINE" },
             {
                 where: {
-                    apiSMSidDevice
+                    deviceKindOfId
                 }
             }
         )
@@ -91,8 +90,7 @@ sms.post("/pending", async (req, res) => {
 })
 
 sms.put("/received", async (req, res) => {
-    const apiSMSidDevice = req.header("apiSMSidDevice")
-    const { apiSMSId } = req.body
+    const { deviceKindOfId, apiSMSId } = req.body
 
     if (typeof apiSMSId != "string" || apiSMSId == "") {
         res.status(400).json({ detail: "Missing or invalid apiSMSId" })
@@ -104,7 +102,7 @@ sms.put("/received", async (req, res) => {
             deviceNotified: true,
         }, {
             where: {
-                [Op.and]: [{ apiSMSId }, { apiSMSidDevice }]
+                [Op.and]: [{ apiSMSId }, { deviceKindOfId }]
             }
         })
 
@@ -120,8 +118,7 @@ sms.put("/received", async (req, res) => {
 })
 
 sms.post("/update", async (req, res) => {
-    const apiSMSidDevice = req.header("apiSMSidDevice")
-    const { apiSMSId, smsId, partNumber, totalParts, newStatus } = req.body
+    const { deviceKindOfId, apiSMSId, smsId, partNumber, totalParts, newStatus } = req.body
     if (typeof apiSMSId != "string" && typeof smsId != "string" && typeof partNumber != "number" && typeof totalParts == "number" &&
         typeof newStatus != "string") {
         res.status(400).json({ detail: "Missing argument/s apiSMSId, smsId, partNumber, totalParts, newStatus" })
@@ -129,11 +126,11 @@ sms.post("/update", async (req, res) => {
     }
 
     try {
-        const smsStatus = await SMStatus.create({ statusId: uuid(), apiSMSId, smsId, apiSMSidDevice, partNumber, totalParts, newStatus })
+        const smsStatus = await SMStatus.create({ statusId: uuid(), apiSMSId, smsId, deviceKindOfId, partNumber, totalParts, newStatus })
 
         const [currentWork] = await SendersSMSWork.findOrCreate({
             where: {
-                apiSMSidDevice
+                deviceKindOfId
             }
         })
         switch (newStatus) {
@@ -161,18 +158,18 @@ sms.post("/update", async (req, res) => {
 })
 
 sms.post("/offline", async (req, res) => {
-    const apiSMSidDevice = req.header("apiSMSidDevice")
-    if (typeof apiSMSidDevice != "string" || apiSMSidDevice == "") {
-        res.status(400).json({ detail: "Missining and/or invalid deviceId" })
+    const { deviceKindOfId } = req.body
+    if (typeof deviceKindOfId != "string" || deviceKindOfId == "") {
+        res.status(400).json({ detail: "Missining and/or invalid deviceKindOfId" })
         return
     }
 
     try {
-        const [deviceStatus] = await DevicesStatus.update(
+        const [deviceStatus] = await SMSenderStatus.update(
             { status: "OFFLINE" },
             {
                 where: {
-                    apiSMSidDevice
+                    deviceKindOfId
                 }
             }
         )
@@ -190,9 +187,9 @@ sms.post("/offline", async (req, res) => {
 })
 
 sms.post("/issue", async (req, res) => {
-    const apiSMSidDevice = req.header("apiSMSidDevice")
-    if (typeof apiSMSidDevice != "string" || apiSMSidDevice == "") {
-        res.status(400).json({ detail: "Missining and/or invalid deviceId" })
+    const { deviceKindOfId } = req.body
+    if (typeof deviceKindOfId != "string" || deviceKindOfId == "") {
+        res.status(400).json({ detail: "Missining and/or invalid deviceKindOfId" })
         return
     }
 
@@ -203,7 +200,7 @@ sms.post("/issue", async (req, res) => {
     }
 
     try {
-        const issue = await Issue.create({ apiSMSidIssue: uuid(), apiSMSidDevice, code, message, detail, path, isBodyEmpty })
+        const issue = await Issue.create({ apiSMSidIssue: uuid(), deviceKindOfId, code, message, detail, path, isBodyEmpty })
         res.status(200).json(issue)
     } catch (e: any) {
         console.log(e)

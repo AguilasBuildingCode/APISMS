@@ -1,5 +1,5 @@
 import { DataTypes, Model } from "sequelize";
-import { smsSequelize } from "../../../db/sequelize";
+import { smsSequelize } from "../db/sequelize";
 
 class Connection extends Model { }
 
@@ -8,9 +8,12 @@ Connection.init({
         type: DataTypes.STRING,
         primaryKey: true,
         allowNull: false,
-    }, userId: {
+    }, agentId: {
         type: DataTypes.UUID,
         allowNull: false,
+        validate: {
+            isUUID: 4
+        }
     }, deleted: {
         type: DataTypes.BOOLEAN,
         defaultValue: false,

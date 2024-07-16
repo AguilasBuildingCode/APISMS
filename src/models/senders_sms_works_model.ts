@@ -1,13 +1,16 @@
 import { DataTypes, Model } from "sequelize";
-import { smsSequelize } from "../../../db/sequelize";
+import { smsSequelize } from "../db/sequelize";
 
 class SendersSMSWork extends Model { }
 
 SendersSMSWork.init({
-    apiSMSidDevice: {
+    deviceKindOfId: {
         type: DataTypes.UUID,
         primaryKey: true,
         allowNull: false,
+        validate: {
+            isUUID: 4
+        }
     }, smsPending: {
         type: DataTypes.NUMBER,
         defaultValue: 0,

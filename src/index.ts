@@ -6,9 +6,9 @@ import http from "http";
 import express from "express";
 import { Server } from "socket.io"
 import { apis, apisPath } from "./routes/apis/apis";
-import { auth, authPath, loginMiddleware } from "./routes/auth/auth";
-import authMiddleware from "./routes/middlewares/auth_middleware";
+import { auth, authMiddleware, authPath } from "./routes/auth/auth";
 import assignmentSMSPendingCron from "./cron/devices_works";
+import authValidateMiddleware from "./middlewares/auth_validate_middleware";
 
 const config = Config.getInstance();
 config
@@ -35,8 +35,8 @@ app.use(
 );
 app.use(helmet());
 
-app.use(authPath, loginMiddleware, auth);
-app.use(apisPath, authMiddleware, apis);
+app.use(authPath, authMiddleware, auth);
+app.use(apisPath, authValidateMiddleware, apis);
 
 if (config.getEnv() === EnvTypes.PROD) {
   io.attach(https

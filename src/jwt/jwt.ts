@@ -1,12 +1,13 @@
 import jwt from "jsonwebtoken"
 import Config, { EnvTypes } from "../config/config"
-import Users from "../routes/auth/models/users_model"
-import Connection from "../routes/auth/models/connection_model"
+import Connection from "../models/connection_model"
+import Users from "../models/users_model"
+import Devices from "../models/devices_model"
 
 export default class JWT {
     constructor(private config = Config.getInstance()) { }
 
-    private getToken(who: Users, expireAt: number): string {
+    private getToken(who: Users | Devices, expireAt: number): string {
         if (this.config.getEnv() == EnvTypes.PROD) {
             return jwt.sign({ data: who, exp: expireAt }, this.config.getKey(), { algorithm: "RS512" })
         }
@@ -30,12 +31,12 @@ export default class JWT {
         return !this.isConnValid(lastConn)
     }
 
-    sing(who: Users): Promise<Connection> {
+    sing(who: Users | Devices): Promise<Connection> {
         const expireAt = Math.floor(Date.now() / 1000) + 3600
         return new Promise(async (res, rej) => {
             try {
                 const token = this.getToken(who, expireAt)
-                const conn = await Connection.create({ token, userId: who.getDataValue("userId"), expireAt })
+                const conn = await Connection.create({ token, agentId: who.getAgentId(), expireAt })
                 res(conn)
             } catch (e) {
                 rej(e)
@@ -43,7 +44,7 @@ export default class JWT {
         })
     }
 
-    verify(token: string): Users {
+    verify(token: string): Users | Devices {
         const user = this.verifyToken(token)
 
         if (typeof user == "string") {
@@ -51,7 +52,7 @@ export default class JWT {
         }
 
         if (typeof user == "object") {
-            return user.data as Users
+            return user.data
         }
         throw new Error("Invalid token")
     }

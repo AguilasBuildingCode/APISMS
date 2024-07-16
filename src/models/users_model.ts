@@ -1,13 +1,20 @@
 import { DataTypes, Model } from "sequelize";
-import { smsSequelize } from "../../../db/sequelize";
+import { smsSequelize } from "../db/sequelize";
 
-class Users extends Model { }
+class Users extends Model { 
+    getAgentId() {
+        return this.getDataValue("userId")
+    }
+}
 
 Users.init({
     userId: {
         type: DataTypes.UUID,
         primaryKey: true,
         allowNull: false,
+        validate: {
+            isUUID: 4
+        }
     }, businessName: {
         type: DataTypes.STRING,
         allowNull: false,

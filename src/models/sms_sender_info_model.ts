@@ -1,16 +1,22 @@
 import { DataTypes, Model } from "sequelize";
-import { smsSequelize } from "../../../db/sequelize";
+import { smsSequelize } from "../db/sequelize";
 
-class DeviceInfo extends Model { }
+class SMSenderInfo extends Model { }
 
-DeviceInfo.init({
-    apiSMSidDevice: {
+SMSenderInfo.init({
+    deviceKindOfId: {
         type: DataTypes.UUID,
         primaryKey: true,
         allowNull: false,
+        validate: {
+            isUUID: 4
+        }
     }, userId: {
         type: DataTypes.UUID,
         allowNull: false,
+        validate: {
+            isUUID: 4
+        }
     }, id: {
         type: DataTypes.STRING,
         allowNull: false
@@ -66,9 +72,9 @@ DeviceInfo.init({
     },
 }, {
     sequelize: smsSequelize,
-    modelName: "devices_info"
+    modelName: "sms_sender_info"
 })
 
-DeviceInfo.sync()
+SMSenderInfo.sync()
 
-export default DeviceInfo
+export default SMSenderInfo
