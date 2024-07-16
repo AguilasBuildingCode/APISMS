@@ -21,7 +21,6 @@ sms.put("/send", async (req, res) => {
         const currentSMS = await SMS.create({ apiSMSId: uuid(), countryCode, number, message })
         res.status(200).json({ apiSMSId: currentSMS.getDataValue("apiSMSId"), createdAt: currentSMS.getDataValue("createdAt") });
     } catch (e: any) {
-        console.error(e)
         res.status(500).json({ detail: e.message })
     }
 })

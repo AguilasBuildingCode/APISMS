@@ -53,7 +53,7 @@ Users.init({
 
 Users.sync().finally(async () => {
     try {
-        const rootUser = await Users.findOrCreate({
+        await Users.findOrCreate({
             where: { userId: process.env.ROOT_USER_ID },
             defaults: {
                 userId: process.env.ROOT_USER_ID,
@@ -63,7 +63,6 @@ Users.sync().finally(async () => {
                 type: process.env.ROOT_USER_TYPE,
             },
         })
-        console.log(JSON.stringify({ rootUser }))
     } catch (e) {
         console.error(e)
     }

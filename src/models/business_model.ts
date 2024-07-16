@@ -25,13 +25,12 @@ Business.init({
 
 Business.sync().finally(async () => {
     try {
-        const rootBussines = Business.findOrCreate({
+        await Business.findOrCreate({
             where: { businessName: process.env.BUSSINES_NAME },
             defaults: {
                 businessName: process.env.BUSSINES_NAME, legalRep: process.env.LEGAL_REP
             }
         })
-        console.log(JSON.stringify(rootBussines))
     } catch(e) {
         console.error(e)
     }

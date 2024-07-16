@@ -1,7 +1,14 @@
 import { DataTypes, Model } from "sequelize";
 import { smsSequelize } from "../db/sequelize";
 
-class Connection extends Model { }
+class Connection extends Model {
+    asUserInfo() {
+        return {
+            token: this.getDataValue("token"),
+            expireAt: this.getDataValue("expireAt"),
+        }
+    }
+}
 
 Connection.init({
     token: {

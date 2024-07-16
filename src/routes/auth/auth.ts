@@ -37,7 +37,6 @@ const authMiddleware: RequestHandler<any> = async (req, res, next) => {
 }
 
 auth.post("/login", async (req, res) => {
-    console.log(JSON.stringify({ body: req.body }))
     const { agentId, userName, password, currentConn } = req.body
     try {
         if (currentConn && jwt.isConnValid(currentConn)) {
@@ -69,9 +68,8 @@ auth.post("/login", async (req, res) => {
         }
 
         const conn = await jwt.sing(agent)
-        res.status(200).json(conn)
+        res.status(200).json(conn.asUserInfo())
     } catch (e: any) {
-        console.log(e)
         res.status(500).json({ detail: e.message })
     }
 })
@@ -98,7 +96,6 @@ auth.post("/logout", async (req, res) => {
         }
         res.status(404).json({ detail: "Invalid token" })
     } catch (e: any) {
-        console.log(e)
         res.status(500).json({ detail: e.message })
     }
 })

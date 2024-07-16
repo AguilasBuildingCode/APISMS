@@ -61,7 +61,6 @@ sms.post("/online", async (req, res) => {
 
         res.status(404).json({ detail: "Invalid device" })
     } catch (e: any) {
-        console.error(e)
         res.status(500).json({ detail: e.message })
     }
 })
@@ -181,7 +180,6 @@ sms.post("/offline", async (req, res) => {
 
         res.status(404).json({ detail: "Invalid device" })
     } catch (e: any) {
-        console.error(e)
         res.status(500).json({ detail: e.message })
     }
 })
@@ -203,7 +201,6 @@ sms.post("/issue", async (req, res) => {
         const issue = await Issue.create({ apiSMSidIssue: uuid(), deviceKindOfId, code, message, detail, path, isBodyEmpty })
         res.status(200).json(issue)
     } catch (e: any) {
-        console.log(e)
         res.status(500).json({ detail: e.message })
     }
 })

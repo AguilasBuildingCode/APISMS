@@ -13,8 +13,6 @@ const assignmentSMSPendingCron = cron.schedule('*/1 * * * *', async () => {
             }
         })
 
-        console.log(JSON.stringify({ smsPendings }))
-
         if (smsPendings.length <= 0) {
             return
         }

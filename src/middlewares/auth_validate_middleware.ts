@@ -39,7 +39,6 @@ const authValidateMiddleware: RequestHandler<any> = async (req, res, next) => {
         req.body = { ...agent, token: splitedToke[1], currentConn, ...req.body }
         next()
     } catch (e: any) {
-        console.error(e)
         res.status(401).json({ detail: e.message })
     }
 }
