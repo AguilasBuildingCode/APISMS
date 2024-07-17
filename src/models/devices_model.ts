@@ -53,7 +53,7 @@ Devices.init({
         type: DataTypes.BOOLEAN,
         defaultValue: false,
         allowNull: false,
-    }
+    },
 }, {
     sequelize: smsSequelize,
     modelName: "devices"

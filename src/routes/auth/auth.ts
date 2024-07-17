@@ -28,7 +28,7 @@ const authMiddleware: RequestHandler<any> = async (req, res, next) => {
 
             if (currentConn && jwt.verify(currentConn.getDataValue("token"))) {
                 const expireAt = currentConn.getDataValue("expireAt")
-                res.status(401).json({ detail: "Your last connection already is valid", expireAt, retryAt: expireAt - 300 })
+                res.status(401).json({ detail: "Your last connection already is valid", expireAt })
                 return
             }
             next()
@@ -42,16 +42,25 @@ const authMiddleware: RequestHandler<any> = async (req, res, next) => {
 }
 
 auth.post("/login", async (req, res) => {
-    const { agentId, userName, password, token, currentConn } = req.body
+    const { agentId, userName, password, parentToken, token, currentConn } = req.body
     try {
-        if (token && currentConn && jwt.verify(token)) {
-            const expireAt = currentConn.getDataValue("expireAt")
-            res.status(401).json({ detail: "Your last connection already is valid", expireAt, retryAt: expireAt - 300 })
-            return
+        try {
+            if (parentToken && currentConn && jwt.verify(parentToken)) {
+                const expireAt = currentConn.getDataValue("expireAt")
+                res.status(401).json({ detail: "Your last connection already is valid", expireAt })
+                return
+            }
+
+            if (!parentToken && token && currentConn && jwt.verify(token)) {
+                const expireAt = currentConn.getDataValue("expireAt")
+                res.status(401).json({ detail: "Your last connection already is valid", expireAt })
+                return
+            }
+        } catch (e) {
+            console.error(e)
         }
 
         const agent = (await Users.findByPk(agentId)) ?? (await Devices.findByPk(agentId))
-
         if (!agent) {
             res.status(401).json({ detail: "Invalid agentId and/or userName and/or password" })
             return
@@ -76,6 +85,7 @@ auth.post("/login", async (req, res) => {
         const conn = await jwt.sing(agent)
         res.status(200).json(conn.asUserInfo())
     } catch (e: any) {
+        console.error(e)
         res.status(500).json({ detail: e.message })
     }
 })

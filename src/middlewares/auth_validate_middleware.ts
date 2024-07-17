@@ -1,6 +1,7 @@
 import { RequestHandler } from "express"
 import JWT from "../security/jwt"
 import Connection from "../models/connection_model"
+import { Op } from "sequelize"
 
 const jwt = new JWT()
 const authValidateMiddleware: RequestHandler<any> = async (req, res, next) => {
@@ -20,7 +21,7 @@ const authValidateMiddleware: RequestHandler<any> = async (req, res, next) => {
         const currentConn = await Connection.findOne({
             attributes: ["expireAt"],
             where: {
-                token: splitedToke[1],
+                [Op.or]: [{ token: splitedToke[1] }, { refreshToken: splitedToke[1] }],
                 deleted: false
             }
         })
@@ -31,7 +32,12 @@ const authValidateMiddleware: RequestHandler<any> = async (req, res, next) => {
         }
 
         const agent = jwt.verify(splitedToke[1])
-        req.body = { agentId: (agent as any).userId || (agent as any).deviceId, ...agent, token: splitedToke[1], currentConn, ...req.body }
+        let parentAgent: any = null
+        if (jwt.isRefreshToken(agent)) {
+            parentAgent = jwt.decode(agent.parentToken)
+        }
+
+        req.body = { agentId: (agent as any).userId || parentAgent.userId || (agent as any).deviceId || parentAgent.deviceId, ...agent, ...parentAgent, token: splitedToke[1], currentConn, ...req.body }
         next()
     } catch (e: any) {
         res.status(401).json({ detail: e.message })

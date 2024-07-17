@@ -4,10 +4,14 @@ import Connection from "../models/connection_model"
 import Users from "../models/users_model"
 import Devices from "../models/devices_model"
 
+export interface RefreshToken {
+    parentToken: string
+}
+
 export default class JWT {
     constructor(private config = Config.getInstance()) { }
 
-    private getToken(who: Users | Devices, expireAt: number): string {
+    private getToken(who: Users | Devices | RefreshToken, expireAt: number): string {
         if (this.config.getEnv() == EnvTypes.PROD) {
             return jwt.sign({ data: who, exp: expireAt }, this.config.getKey(), { algorithm: "RS512" })
         }
@@ -26,7 +30,8 @@ export default class JWT {
         return new Promise(async (res, rej) => {
             try {
                 const token = this.getToken(who, expireAt)
-                const conn = await Connection.create({ token, agentId: who.getAgentId(), expireAt })
+                const refreshToken = this.getToken({ parentToken: token }, expireAt + 300)
+                const conn = await Connection.create({ token, refreshToken, agentId: who.getAgentId(), expireAt })
                 res(conn)
             } catch (e) {
                 rej(e)
@@ -34,16 +39,32 @@ export default class JWT {
         })
     }
 
-    verify(token: string): Users | Devices {
-        const user = this.verifyToken(token)
+    verify(token: string): Users | Devices | RefreshToken {
+        const agent = this.verifyToken(token)
 
-        if (typeof user == "string") {
+        if (typeof agent == "string") {
             throw new Error("Invalid token")
         }
 
-        if (typeof user == "object") {
-            return user.data
+        if (typeof agent == "object") {
+            return agent.data
         }
         throw new Error("Invalid token")
+    }
+
+    decode(token: string): Users | Devices | RefreshToken {
+        const agent = jwt.decode(token)
+        if (typeof agent == "string") {
+            throw new Error("Invalid token")
+        }
+
+        if (agent && typeof agent == "object") {
+            return agent.data
+        }
+        throw new Error("Invalid token")
+    }
+
+    isRefreshToken(object: unknown): object is RefreshToken {
+        return Object.prototype.hasOwnProperty.call(object, "parentToken")
     }
 }

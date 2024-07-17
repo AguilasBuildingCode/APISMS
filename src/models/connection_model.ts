@@ -5,6 +5,7 @@ class Connection extends Model {
     asUserInfo() {
         return {
             token: this.getDataValue("token"),
+            refreshToken: this.getDataValue("refreshToken"),
             expireAt: this.getDataValue("expireAt"),
         }
     }
@@ -12,6 +13,10 @@ class Connection extends Model {
 
 Connection.init({
     token: {
+        type: DataTypes.STRING,
+        primaryKey: true,
+        allowNull: false,
+    }, refreshToken: {
         type: DataTypes.STRING,
         primaryKey: true,
         allowNull: false,
