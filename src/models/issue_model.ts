@@ -1,7 +1,14 @@
 import { DataTypes, Model } from "sequelize";
 import { smsSequelize } from "../db/sequelize";
 
-class Issue extends Model { }
+class Issue extends Model {
+    asUserInfo() {
+        return {
+            apiSMSidIssue: this.getDataValue("apiSMSidIssue"),
+
+        }
+    }
+}
 
 Issue.init({
     apiSMSidIssue: {

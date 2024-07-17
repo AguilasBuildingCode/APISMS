@@ -1,6 +1,6 @@
 import express from "express";
-import Devices from "../../../models/devices_model";
-import Encrypt from "../../../security/encrypt";
+import Devices from "../../../../models/devices_model";
+import Encrypt from "../../../../security/encrypt";
 import { v4 as uuid } from 'uuid';
 
 const admon = express.Router();

@@ -1,12 +1,12 @@
 import express from "express";
 import { v4 as uuid } from "uuid"
-import SMSenderInfo from "../../../../models/sms_sender_info_model";
-import SMSenderStatus from "../../../../models/sms_sender_status_model";
-import Issue from "../../../../models/issue_model";
-import SendersSMSWork from "../../../../models/senders_sms_works_model";
-import SMS from "../../../../models/sms_model";
+import SMSenderInfo from "../../../../../models/sms_sender_info_model";
+import SMSenderStatus from "../../../../../models/sms_sender_status_model";
+import Issue from "../../../../../models/issue_model";
+import SendersSMSWork from "../../../../../models/senders_sms_works_model";
+import SMS from "../../../../../models/sms_model";
 import { Op } from "sequelize";
-import SMStatus from "../../../../models/sms_status_model";
+import SMStatus from "../../../../../models/sms_status_model";
 
 const sms = express.Router();
 const smsPath = "/sms"
@@ -199,7 +199,7 @@ sms.post("/issue", async (req, res) => {
 
     try {
         const issue = await Issue.create({ apiSMSidIssue: uuid(), deviceKindOfId, code, message, detail, path, isBodyEmpty })
-        res.status(200).json(issue)
+        res.status(200).json(issue.asUserInfo())
     } catch (e: any) {
         res.status(500).json({ detail: e.message })
     }

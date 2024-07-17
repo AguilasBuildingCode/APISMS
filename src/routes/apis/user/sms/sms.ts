@@ -1,6 +1,6 @@
 import { v4 as uuid } from "uuid"
 import express from "express";
-import SMS from "../../../models/sms_model";
+import SMS from "../../../../models/sms_model";
 
 const sms = express.Router();
 const smsPath = "/sms"
