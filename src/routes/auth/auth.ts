@@ -14,23 +14,27 @@ const authMiddleware: RequestHandler<any> = async (req, res, next) => {
     const { agentId, userName, password } = req.body
     if (typeof agentId == "string" && typeof userName == "string" && typeof password == "string") {
 
-        const currentConn = await Connection.findOne({
-            attributes: ["expireAt"],
-            where: {
-                agentId,
-                deleted: false,
-            },
-            order: [
-                ["expireAt", "DESC"]
-            ]
-        })
+        try {
+            const currentConn = await Connection.findOne({
+                attributes: ["token", "expireAt"],
+                where: {
+                    agentId,
+                    deleted: false,
+                },
+                order: [
+                    ["expireAt", "DESC"]
+                ]
+            })
 
-        if (currentConn && jwt.isConnValid(currentConn)) {
-            const expireAt = currentConn.getDataValue("expireAt")
-            res.status(401).json({ detail: "Your connection already is valid", expireAt, retryAt: expireAt - 300 })
-            return
+            if (currentConn && jwt.verify(currentConn.getDataValue("token"))) {
+                const expireAt = currentConn.getDataValue("expireAt")
+                res.status(401).json({ detail: "Your last connection already is valid", expireAt, retryAt: expireAt - 300 })
+                return
+            }
+            next()
+        } catch (e: any) {
+            next()
         }
-        next()
         return
     }
 
@@ -38,11 +42,11 @@ const authMiddleware: RequestHandler<any> = async (req, res, next) => {
 }
 
 auth.post("/login", async (req, res) => {
-    const { agentId, userName, password, currentConn } = req.body
+    const { agentId, userName, password, token, currentConn } = req.body
     try {
-        if (currentConn && jwt.isConnValid(currentConn)) {
+        if (token && currentConn && jwt.verify(token)) {
             const expireAt = currentConn.getDataValue("expireAt")
-            res.status(401).json({ detail: "Your connection already is valid", expireAt, retryAt: expireAt - 300 })
+            res.status(401).json({ detail: "Your last connection already is valid", expireAt, retryAt: expireAt - 300 })
             return
         }
 
@@ -58,8 +62,8 @@ auth.post("/login", async (req, res) => {
             return
         }
 
-        if (!await Encrypt.compare(userName, agent.getDataValue("userName"))
-            || !await Encrypt.compare(password, agent.getDataValue("password"))) {
+        if (userName != agent.getDataValue("userName")
+            || (!await Encrypt.compare(password, agent.getDataValue("password")) && password != agent.getDataValue("password"))) {
             const attemptsLogin = Number(agent.getDataValue("attemptsLogin")) + 1
             agent.update({
                 attemptsLogin,

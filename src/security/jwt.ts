@@ -21,16 +21,6 @@ export default class JWT {
         return jwt.verify(token, this.config.getJWTSecret(), { algorithms: ["HS256"] })
     }
 
-    isConnValid(lastConn: Connection): boolean {
-        const nowLess5Min = Math.floor(Date.now() / 1000) - 300 // Less 5 min
-        const lastConnExpireAt = Number(lastConn.getDataValue("expireAt"))
-        return lastConnExpireAt > nowLess5Min
-    }
-
-    isConnNotValid(lastConn: Connection): boolean {
-        return !this.isConnValid(lastConn)
-    }
-
     sing(who: Users | Devices): Promise<Connection> {
         const expireAt = Math.floor(Date.now() / 1000) + 3600
         return new Promise(async (res, rej) => {

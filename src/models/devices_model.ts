@@ -9,8 +9,7 @@ class Devices extends Model {
     asUserInfo() {
         return {
             deviceId: this.getDataValue("deviceId"),
-            deviceKindOfId: this.getDataValue("deviceKindOfId"),
-            kind: this.getDataValue("kind"),
+            deviceKindOfId: this.getDataValue("deviceKindOfId")
         }
     }
 }

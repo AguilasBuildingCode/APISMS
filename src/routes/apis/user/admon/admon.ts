@@ -2,6 +2,8 @@ import express from "express";
 import Devices from "../../../../models/devices_model";
 import Encrypt from "../../../../security/encrypt";
 import { v4 as uuid } from 'uuid';
+import QRcode from "qrcode"
+import Utils from "../../../../utils/utils";
 
 const admon = express.Router();
 const admonPath = "/admon"
@@ -15,11 +17,25 @@ admon.put("/devices", async (req, res) => {
     }
 
     try {
-        const tmpUserName = await Encrypt.hash(userName)
+        const registedDevice = await Devices.findOne({
+            where: {
+                userId, kind, userName
+            }
+        })
+
+        if (registedDevice) {
+            res.status(400).json({ detail: "Device already registed" })
+            return
+        }
+
+        const deviceId = uuid()
+        const deviceKindOfId = uuid()
         const tmpPassword = await Encrypt.hash(password)
 
-        const device = await Devices.create({ deviceId: uuid(), userId, deviceKindOfId: uuid(), kind, userName: tmpUserName, password: tmpPassword })
-        res.status(200).json(device.asUserInfo())
+        const device = await Devices.create({ deviceId, userId, deviceKindOfId, kind, userName, password: tmpPassword })
+        const qrPath = Utils.imgsPathBuilder(`${uuid()}.png`, userId, deviceId, deviceKindOfId, userName)
+        await QRcode.toFile(qrPath, JSON.stringify({ ...device.asUserInfo(), userName, password }), { type: "png" })
+        res.status(200).sendFile(qrPath)
     } catch (e: any) {
         console.error(e)
         res.status(400).json({ detail: e.message })

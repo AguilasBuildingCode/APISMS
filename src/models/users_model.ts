@@ -54,7 +54,7 @@ Users.sync().finally(async () => {
             defaults: {
                 userId: process.env.ROOT_USER_ID,
                 businessName: process.env.BUSSINES_NAME,
-                userName: await Encrypt.hash(process.env.ROOT_USER_NAME ?? uuid()),
+                userName: process.env.ROOT_USER_NAME,
                 password: await Encrypt.hash(process.env.ROOT_USER_PASSWORD ?? uuid()),
                 type: process.env.ROOT_USER_TYPE,
             },

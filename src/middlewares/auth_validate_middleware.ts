@@ -30,13 +30,8 @@ const authValidateMiddleware: RequestHandler<any> = async (req, res, next) => {
             return
         }
 
-        if (jwt.isConnNotValid(currentConn)) {
-            res.status(401).json({ detail: "Your connection expired", })
-            return
-        }
-
         const agent = jwt.verify(splitedToke[1])
-        req.body = { ...agent, token: splitedToke[1], currentConn, ...req.body }
+        req.body = { agentId: (agent as any).userId || (agent as any).deviceId, ...agent, token: splitedToke[1], currentConn, ...req.body }
         next()
     } catch (e: any) {
         res.status(401).json({ detail: e.message })
