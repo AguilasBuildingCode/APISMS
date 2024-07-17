@@ -150,7 +150,7 @@ sms.post("/update", async (req, res) => {
                 break
         }
 
-        res.status(200).json(smsStatus)
+        res.status(200).json(smsStatus.asUserInfo())
     } catch (e: any) {
         res.status(500).json({ detail: e.message })
     }

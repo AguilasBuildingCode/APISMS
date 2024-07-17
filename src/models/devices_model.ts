@@ -1,7 +1,6 @@
 import { DataTypes, Model } from "sequelize";
 import { smsSequelize } from "../db/sequelize";
 import { DeviceTypes } from "../enums/devices_types";
-import { v4 as uuid } from "uuid"
 
 class Devices extends Model {
     getAgentId() {
@@ -19,7 +18,6 @@ class Devices extends Model {
 Devices.init({
     deviceId: {
         type: DataTypes.UUID,
-        defaultValue: uuid(),
         primaryKey: true,
         allowNull: false,
         validate: {
@@ -33,7 +31,6 @@ Devices.init({
         }
     }, deviceKindOfId: {
         type: DataTypes.UUID,
-        defaultValue: uuid(),
         allowNull: false,
         validate: {
             isUUID: 4
@@ -46,9 +43,6 @@ Devices.init({
         type: DataTypes.STRING,
         allowNull: false,
         unique: true,
-        validate: {
-            isEmail: true,
-        }
     }, password: {
         type: DataTypes.STRING,
         allowNull: false,

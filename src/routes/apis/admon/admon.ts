@@ -1,5 +1,7 @@
 import express from "express";
 import Devices from "../../../models/devices_model";
+import Encrypt from "../../../security/encrypt";
+import { v4 as uuid } from 'uuid';
 
 const admon = express.Router();
 const admonPath = "/admon"
@@ -13,22 +15,13 @@ admon.put("/devices", async (req, res) => {
     }
 
     try {
-        const alreadyRegister = await Devices.findOne({
-            where: {
-                kind,
-                userName,
-                password,
-            }
-        })
+        const tmpUserName = await Encrypt.hash(userName)
+        const tmpPassword = await Encrypt.hash(password)
 
-        if (alreadyRegister) {
-            res.status(400).json({ detail: `This password already use with this kind "${kind}"` })
-            return
-        }
-
-        const device = await Devices.create({ userId, kind, userName, password })
+        const device = await Devices.create({ deviceId: uuid(), userId, deviceKindOfId: uuid(), kind, userName: tmpUserName, password: tmpPassword })
         res.status(200).json(device.asUserInfo())
     } catch (e: any) {
+        console.error(e)
         res.status(400).json({ detail: e.message })
     }
 })

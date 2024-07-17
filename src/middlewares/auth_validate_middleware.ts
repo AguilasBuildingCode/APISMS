@@ -1,5 +1,5 @@
 import { RequestHandler } from "express"
-import JWT from "../jwt/jwt"
+import JWT from "../security/jwt"
 import Connection from "../models/connection_model"
 
 const jwt = new JWT()

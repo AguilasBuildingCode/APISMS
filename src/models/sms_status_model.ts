@@ -1,7 +1,14 @@
 import { DataTypes, Model } from "sequelize";
 import { smsSequelize } from "../db/sequelize";
 
-class SMStatus extends Model { }
+class SMStatus extends Model {
+    asUserInfo() {
+        return {
+            date: this.getDataValue("date"),
+            statusId: this.getDataValue("statusId"),
+        }
+    }
+ }
 
 SMStatus.init({
     statusId: {

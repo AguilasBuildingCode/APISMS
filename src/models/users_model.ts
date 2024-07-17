@@ -1,7 +1,9 @@
 import { DataTypes, Model } from "sequelize";
 import { smsSequelize } from "../db/sequelize";
+import { v4 as uuid } from "uuid"
+import Encrypt from "../security/encrypt";
 
-class Users extends Model { 
+class Users extends Model {
     getAgentId() {
         return this.getDataValue("userId")
     }
@@ -25,15 +27,9 @@ Users.init({
         type: DataTypes.STRING,
         allowNull: false,
         unique: true,
-        validate: {
-            isEmail: true,
-        }
     }, password: {
-        type: DataTypes.STRING(64),
+        type: DataTypes.STRING,
         allowNull: false,
-        validate: {
-            len: [16, 64],
-        }
     }, type: {
         type: DataTypes.STRING,
         allowNull: false
@@ -58,8 +54,8 @@ Users.sync().finally(async () => {
             defaults: {
                 userId: process.env.ROOT_USER_ID,
                 businessName: process.env.BUSSINES_NAME,
-                userName: process.env.ROOT_USER_NAME,
-                password: process.env.ROOT_USER_PASSWORD,
+                userName: await Encrypt.hash(process.env.ROOT_USER_NAME ?? uuid()),
+                password: await Encrypt.hash(process.env.ROOT_USER_PASSWORD ?? uuid()),
                 type: process.env.ROOT_USER_TYPE,
             },
         })

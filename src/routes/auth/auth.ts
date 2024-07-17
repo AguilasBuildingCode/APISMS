@@ -1,9 +1,10 @@
 import express, { RequestHandler } from "express";
-import JWT from "../../jwt/jwt";
+import JWT from "../../security/jwt";
 import Connection from "../../models/connection_model";
 import authValidateMiddleware from "../../middlewares/auth_validate_middleware";
 import Users from "../../models/users_model";
 import Devices from "../../models/devices_model";
+import Encrypt from "../../security/encrypt";
 
 const jwt = new JWT()
 const auth = express.Router();
@@ -57,7 +58,8 @@ auth.post("/login", async (req, res) => {
             return
         }
 
-        if (userName != agent.getDataValue("userName") || password != agent.getDataValue("password")) {
+        if (!await Encrypt.compare(userName, agent.getDataValue("userName"))
+            || !await Encrypt.compare(password, agent.getDataValue("password"))) {
             const attemptsLogin = Number(agent.getDataValue("attemptsLogin")) + 1
             agent.update({
                 attemptsLogin,
