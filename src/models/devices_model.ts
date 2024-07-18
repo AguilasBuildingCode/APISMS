@@ -35,8 +35,8 @@ Devices.init({
             isUUID: 4
         }
     }, kind: {
-        type: DataTypes.ENUM(DeviceTypes.SMS_SNEDER),
-        defaultValue: DeviceTypes.SMS_SNEDER,
+        type: DataTypes.ENUM(DeviceTypes.SMS_SENDER),
+        defaultValue: DeviceTypes.SMS_SENDER,
         allowNull: false,
     }, userName: {
         type: DataTypes.STRING,

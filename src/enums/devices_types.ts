@@ -1,5 +1,5 @@
 enum DeviceTypes {
-    SMS_SNEDER = "SMS_SNEDER"
+    SMS_SENDER = "SMS_SENDER"
 }
 
 export { DeviceTypes }

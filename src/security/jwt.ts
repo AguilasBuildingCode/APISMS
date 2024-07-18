@@ -13,14 +13,14 @@ export default class JWT {
 
     private getToken(who: Users | Devices | RefreshToken, expireAt: number): string {
         if (this.config.getEnv() == EnvTypes.PROD) {
-            return jwt.sign({ data: who, exp: expireAt }, this.config.getKey(), { algorithm: "RS512" })
+            return jwt.sign({ data: who, exp: expireAt }, this.config.getKey(), { algorithm: "ES256" })
         }
         return jwt.sign({ data: who, exp: expireAt }, this.config.getJWTSecret(), { algorithm: "HS256" })
     }
 
     private verifyToken(token: string): any {
         if (this.config.getEnv() == EnvTypes.PROD) {
-            return jwt.verify(token, this.config.getKey(), { algorithms: ["RS512"] })
+            return jwt.verify(token, this.config.getKey(), { algorithms: ["ES256"] })
         }
         return jwt.verify(token, this.config.getJWTSecret(), { algorithms: ["HS256"] })
     }

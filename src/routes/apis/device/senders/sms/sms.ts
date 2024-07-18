@@ -14,12 +14,12 @@ const smsPath = "/sms"
 
 sms.put("/register", async (req, res) => {
     const { deviceKindOfId, kind, userId, model, id, sdk, manufacturer, brand, userName, type, appVersionCode, board, host, fingerPrint, appVersionName, carrierIdFromSimMccMnc, simCarrierId, simCarrierIdName, simState, simOperator, simCountryIso, simOperatorName, simSpecificCarrierIdName } = req.body
-    if (typeof deviceKindOfId != "string" || typeof model != "string" || typeof id != "string" || typeof sdk != "number" || typeof manufacturer != "string" || typeof brand != "string" || typeof userName != "string" || typeof type != "string" || typeof appVersionCode != "string" || typeof board != "string" || typeof host != "string" || typeof fingerPrint != "string" || typeof appVersionName != "string") {
+    if (typeof deviceKindOfId != "string" || typeof kind != "string" || typeof model != "string" || typeof id != "string" || typeof sdk != "number" || typeof manufacturer != "string" || typeof brand != "string" || typeof userName != "string" || typeof type != "string" || typeof appVersionCode != "string" || typeof board != "string" || typeof host != "string" || typeof fingerPrint != "string" || typeof appVersionName != "string") {
         res.status(400).json({ detail: "Missing and/or invalid model, id, sdk, manufacturer, brand, userName, type, appVersionCode, board, host, fingerPrint, appVersionName, simState, simOperator, simCountryIso, simOperatorName" })
         return
     }
 
-    if (typeof kind != "string" || kind != DeviceTypes.SMS_SNEDER) {
+    if (kind != DeviceTypes.SMS_SENDER) {
         res.status(403).json({ detail: "Invalid device" })
         return
     }
