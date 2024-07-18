@@ -33,8 +33,8 @@ Business.sync().finally(async () => {
     await Business.findOrCreate({
       where: { businessName: process.env.BUSSINES_NAME },
       defaults: {
-        businessName: Encrypt.encrypt(process.env.BUSSINES_NAME),
-        legalRep: Encrypt.encrypt(process.env.LEGAL_REP),
+        businessName: Encrypt.encrypt(process.env.BUSSINES_NAME ?? "N/A"),
+        legalRep: Encrypt.encrypt(process.env.LEGAL_REP ?? "N/A"),
       },
     });
   } catch (e) {

@@ -4,10 +4,9 @@ import helmet from "helmet";
 import https from "https";
 import http from "http";
 import express from "express";
-import { Server } from "socket.io"
+import { Server } from "socket.io";
 import { apis, apisPath } from "./routes/apis/apis";
 import { auth, authMiddleware, authPath } from "./routes/auth/auth";
-import assignmentSMSPendingCron from "./cron/devices_works";
 import authValidateMiddleware from "./middlewares/auth_validate_middleware";
 
 const config = Config.getInstance();
@@ -39,21 +38,26 @@ app.use(authPath, authMiddleware, auth);
 app.use(apisPath, authValidateMiddleware, apis);
 
 if (config.getEnv() === EnvTypes.PROD) {
-  io.attach(https
-    .createServer(
-      {
-        key: config.getKey(),
-        cert: config.getCert(),
-      },
-      app
-    )
-    .listen(portAPIHTTPS, () => {
-      console.log(`Server run on port: ${portAPIHTTPS}`);
-    }));
+  io.attach(
+    https
+      .createServer(
+        {
+          key: config.getKey(),
+          cert: config.getCert(),
+          ca: config.getCA(),
+        },
+        app
+      )
+      .listen(portAPIHTTPS, () => {
+        console.log(`Server run on port: ${portAPIHTTPS}`);
+      })
+  );
 } else {
-  io.attach(http.createServer(app).listen(portAPIHTTP, () => {
-    console.log(`Server run on port: ${portAPIHTTP}`);
-  }));
+  io.attach(
+    http.createServer(app).listen(portAPIHTTP, () => {
+      console.log(`Server run on port: ${portAPIHTTP}`);
+    })
+  );
 }
 
-export default io
+export default io;

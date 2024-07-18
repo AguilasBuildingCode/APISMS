@@ -26,6 +26,7 @@ export default class Config {
 
   private key?: string;
   private cert?: string;
+  private ca?: string;
 
   static getInstance(): Config {
     return this.config;
@@ -71,6 +72,7 @@ export default class Config {
 
     this.key = path.join(__dirname, `../cert/${this.envType}_key.pem`);
     this.cert = path.join(__dirname, `../cert/${this.envType}_cert.pem`);
+    this.ca = path.join(__dirname, `../cert/${this.envType}_ca.pem`);
 
     this.portAPIHTTP = Number(process.env.PORT_API_HTTP);
     this.portAPIHTTPS = Number(process.env.PORT_API_HTTPS);
@@ -134,6 +136,16 @@ export default class Config {
       throw new Error(`File ${this.cert} not found`);
     }
     throw new Error("Env cert not found");
+  }
+
+  getCA(): string {
+    if (this.ca) {
+      if (fs.existsSync(this.ca)) {
+        return fs.readFileSync(this.ca, "utf8");
+      }
+      throw new Error(`File ${this.ca} not found`);
+    }
+    throw new Error("Env ca not found");
   }
 
   getEnvStatus(): Promise<any> {

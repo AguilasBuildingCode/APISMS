@@ -33,14 +33,14 @@ Users.init(
       unique: true,
       validate: {
         isEmail: true,
-      }
+      },
     },
     password: {
       type: DataTypes.STRING,
       allowNull: false,
       validate: {
-        min: 8
-      }
+        min: 8,
+      },
     },
     type: {
       type: DataTypes.STRING,
@@ -69,7 +69,7 @@ Users.sync().finally(async () => {
       where: { userId: process.env.ROOT_USER_ID },
       defaults: {
         userId: process.env.ROOT_USER_ID,
-        businessName: Encrypt.encrypt(process.env.BUSSINES_NAME),
+        businessName: Encrypt.encrypt(process.env.BUSSINES_NAME ?? "N/A"),
         userName: process.env.ROOT_USER_NAME,
         password: await PsswdEncrypt.hash(
           process.env.ROOT_USER_PASSWORD ?? uuid()
