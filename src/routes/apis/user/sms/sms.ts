@@ -1,28 +1,69 @@
-import { v4 as uuid } from "uuid"
+import { v4 as uuid } from "uuid";
 import express from "express";
 import SMS from "../../../../models/sms_model";
+import Encrypt from "../../../../security/encrypt";
+import SendersSMSWork from "../../../../models/senders_sms_works_model";
+import { SendersSMStatus } from "../../../../enums/senders_sms_status";
+import io from "../../../..";
 
 const sms = express.Router();
-const smsPath = "/sms"
+const smsPath = "/sms";
 
 sms.put("/send", async (req, res) => {
-    const { countryCode, number, message } = req.body
-    if (typeof countryCode != 'string' && typeof number != 'string' && typeof message != 'string') {
-        res.status(400).json({ detail: "Missing or invalid countryCode and/or number and/or message length" })
-        return
+  const { userId, countryCode, number, message } = req.body;
+  if (
+    typeof countryCode != "string" ||
+    countryCode.length != 2 ||
+    typeof number != "string" ||
+    number.length != 10 ||
+    typeof message != "string" ||
+    message.length == 0
+  ) {
+    res.status(400).json({
+      detail: "Missing or invalid countryCode and/or number and/or message",
+    });
+    return;
+  }
+
+  try {
+    const betterSender = await SendersSMSWork.findOne({
+      attributes: ["deviceKindOfId", "smsTotal", "smsPending"],
+      where: {
+        userId,
+        status: SendersSMStatus.ONLINE,
+      },
+      order: [["score", "DESC"]],
+    });
+
+    if (!betterSender) {
+      res.status(404).json({ detail: "No SMS senders found." });
+      return;
     }
 
-    if (countryCode.length != 2 || number.length != 10 || message.length == 0) {
-        res.status(400).json({ detail: "Missing or invalid countryCode and/or number and/or message length" })
-        return
-    }
+    const deviceKindOfId = betterSender.getDataValue("deviceKindOfId");
+    const currentSMS = await SMS.create({
+      apiSMSId: uuid(),
+      userId,
+      deviceKindOfId,
+      countryCode,
+      number: Encrypt.encrypt(number),
+      message: Encrypt.encrypt(message),
+    });
 
-    try {
-        const currentSMS = await SMS.create({ apiSMSId: uuid(), countryCode, number, message })
-        res.status(200).json({ apiSMSId: currentSMS.getDataValue("apiSMSId"), createdAt: currentSMS.getDataValue("createdAt") });
-    } catch (e: any) {
-        res.status(500).json({ detail: e.message })
-    }
-})
+    io.emit(`${deviceKindOfId}-sms-to-send`, {
+      apiSMSId: currentSMS.getDataValue("apiSMSId"),
+      countryCode,
+      number,
+      message,
+    });
+    betterSender.update({
+      smsTotal: Number(betterSender.getDataValue("smsTotal")) + 1,
+      smsPending: Number(betterSender.getDataValue("smsPending")) + 1,
+    });
+    res.status(200).json(currentSMS.asUserInfo());
+  } catch (e: any) {
+    res.status(500).json({ detail: e.message });
+  }
+});
 
-export { sms, smsPath }
+export { sms, smsPath };

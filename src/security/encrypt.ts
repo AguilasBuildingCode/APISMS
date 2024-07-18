@@ -1,14 +1,24 @@
-import bcrypt from "bcrypt"
+import crypto from "crypto";
+import Config from "../config/config";
 
-const saltRounds = 10
-
+const config = Config.getInstance();
 export default class Encrypt {
-    static async hash(plainData: string): Promise<string> {
-        const salt = await bcrypt.genSalt(saltRounds)
-        return await bcrypt.hash(plainData, salt)
-    }
+  static encrypt(toEncrypt: any) {
+    var publicKey = config.getCert();
+    var buffer = Buffer.from(JSON.stringify(toEncrypt));
+    var encrypted = crypto.publicEncrypt(publicKey, buffer);
+    return encrypted.toString("base64");
+  }
 
-    static async compare(plainData: string, hashData: string) {
-        return await bcrypt.compare(plainData, hashData)
-    }
+  static decrypt(toDecrypt: string) {
+    var buffer = Buffer.from(toDecrypt, "base64");
+    const decrypted = crypto.privateDecrypt(
+      {
+        key: config.getKey(),
+        passphrase: config.getJWTSecret(),
+      },
+      buffer
+    );
+    return decrypted.toString("utf8");
+  }
 }

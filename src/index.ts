@@ -49,12 +49,10 @@ if (config.getEnv() === EnvTypes.PROD) {
     )
     .listen(portAPIHTTPS, () => {
       console.log(`Server run on port: ${portAPIHTTPS}`);
-      assignmentSMSPendingCron.start()
     }));
 } else {
   io.attach(http.createServer(app).listen(portAPIHTTP, () => {
     console.log(`Server run on port: ${portAPIHTTP}`);
-    assignmentSMSPendingCron.start()
   }));
 }
 

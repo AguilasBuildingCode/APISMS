@@ -1,47 +1,58 @@
-import { RequestHandler } from "express"
-import JWT from "../security/jwt"
-import Connection from "../models/connection_model"
-import { Op } from "sequelize"
+import { RequestHandler } from "express";
+import JWT from "../security/jwt";
+import Connection from "../models/connection_model";
+import { Op } from "sequelize";
 
-const jwt = new JWT()
+const jwt = new JWT();
 const authValidateMiddleware: RequestHandler<any> = async (req, res, next) => {
-    const token = req.header("Authorization")
-    if (typeof token != "string" || !token.startsWith("Bearer")) {
-        res.status(400).json({ detail: "Missing and/or invalid token" })
-        return
+  const token = req.header("Authorization");
+  if (typeof token != "string" || !token.startsWith("Bearer")) {
+    res.status(400).json({ detail: "Missing and/or invalid token" });
+    return;
+  }
+
+  const splitedToke = token.split(" ");
+  if (splitedToke.length != 2) {
+    res.status(400).json({ detail: "Missing and/or invalid token" });
+    return;
+  }
+
+  try {
+    const currentConn = await Connection.findOne({
+      attributes: ["expireAt"],
+      where: {
+        [Op.or]: [{ token: splitedToke[1] }, { refreshToken: splitedToke[1] }],
+        deleted: false,
+      },
+    });
+
+    if (!currentConn) {
+      res.status(401).json({ detail: "Invalid token" });
+      return;
     }
 
-    const splitedToke = token.split(" ")
-    if (splitedToke.length != 2) {
-        res.status(400).json({ detail: "Missing and/or invalid token" })
-        return
+    const agent = jwt.verify(splitedToke[1]);
+    let parentAgent: any = null;
+    if (jwt.isRefreshToken(agent)) {
+      parentAgent = jwt.decode(agent.parentToken);
     }
 
-    try {
-        const currentConn = await Connection.findOne({
-            attributes: ["expireAt"],
-            where: {
-                [Op.or]: [{ token: splitedToke[1] }, { refreshToken: splitedToke[1] }],
-                deleted: false
-            }
-        })
+    req.body = {
+      agentId:
+        (agent as any).userId ||
+        parentAgent.userId ||
+        (agent as any).deviceId ||
+        parentAgent.deviceId,
+      ...agent,
+      ...parentAgent,
+      token: splitedToke[1],
+      currentConn,
+      ...req.body,
+    };
+    next();
+  } catch (e: any) {
+    res.status(401).json({ detail: e.message });
+  }
+};
 
-        if (!currentConn) {
-            res.status(401).json({ detail: "Invalid token" })
-            return
-        }
-
-        const agent = jwt.verify(splitedToke[1])
-        let parentAgent: any = null
-        if (jwt.isRefreshToken(agent)) {
-            parentAgent = jwt.decode(agent.parentToken)
-        }
-
-        req.body = { agentId: (agent as any).userId || parentAgent.userId || (agent as any).deviceId || parentAgent.deviceId, ...agent, ...parentAgent, token: splitedToke[1], currentConn, ...req.body }
-        next()
-    } catch (e: any) {
-        res.status(401).json({ detail: e.message })
-    }
-}
-
-export default authValidateMiddleware
+export default authValidateMiddleware;

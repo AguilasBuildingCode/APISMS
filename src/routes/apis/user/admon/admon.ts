@@ -1,6 +1,6 @@
 import express from "express";
 import Devices from "../../../../models/devices_model";
-import Encrypt from "../../../../security/encrypt";
+import PsswdEncrypt from "../../../../security/passwd_encrypt";
 import { v4 as uuid } from 'uuid';
 import QRcode from "qrcode"
 import Utils from "../../../../utils/utils";
@@ -30,7 +30,7 @@ admon.put("/devices", async (req, res) => {
 
         const deviceId = uuid()
         const deviceKindOfId = uuid()
-        const tmpPassword = await Encrypt.hash(password)
+        const tmpPassword = await PsswdEncrypt.hash(password)
 
         const device = await Devices.create({ deviceId, userId, deviceKindOfId, kind, userName, password: tmpPassword })
         const qrPath = Utils.imgsPathBuilder(`${uuid()}.png`, userId, deviceId, deviceKindOfId, userName)
