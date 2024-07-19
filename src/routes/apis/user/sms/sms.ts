@@ -6,6 +6,7 @@ import SMSendersWork from "../../../../db/models/sms_senders_works_model";
 import { SendersSMStatus } from "../../../../enums/senders_sms_status";
 import io from "../../../..";
 import Devices from "../../../../db/models/devices_model";
+import { smsSequelize } from "../../../../db/sequelize";
 
 const sms = express.Router();
 const smsPath = "/sms";
@@ -39,7 +40,7 @@ sms.put("/send", async (req, res) => {
           userId: id,
         },
       },
-      order: [["score", "DESC"]],
+      order: smsSequelize.random(),
     });
 
     if (!betterSender) {
