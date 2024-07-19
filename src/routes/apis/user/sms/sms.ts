@@ -5,6 +5,7 @@ import Encrypt from "../../../../security/encrypt";
 import SMSendersWork from "../../../../db/models/sms_senders_works_model";
 import { SendersSMStatus } from "../../../../enums/senders_sms_status";
 import io from "../../../..";
+import Devices from "../../../../db/models/devices_model";
 
 const sms = express.Router();
 const smsPath = "/sms";
@@ -29,8 +30,14 @@ sms.put("/send", async (req, res) => {
     const betterSender = await SMSendersWork.findOne({
       attributes: ["deviceKindOfId", "smsTotal", "smsPending"],
       where: {
-        userId: id,
         status: SendersSMStatus.ONLINE,
+      },
+      include: {
+        attributes: [],
+        model: Devices,
+        where: {
+          userId: id,
+        },
       },
       order: [["score", "DESC"]],
     });

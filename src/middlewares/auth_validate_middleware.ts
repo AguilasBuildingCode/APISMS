@@ -37,8 +37,6 @@ const authValidateMiddleware: RequestHandler<any> = async (req, res, next) => {
       parentAgent = jwt.decode(agent.parentToken);
     }
 
-    console.log(JSON.stringify(agent))
-
     req.body = {
       agentId:
         (agent as any).id ||

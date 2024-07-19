@@ -14,13 +14,6 @@ SMSenderInfo.init(
         isUUID: 4,
       },
     },
-    userId: {
-      type: DataTypes.UUID,
-      allowNull: false,
-      validate: {
-        isUUID: 4,
-      },
-    },
     id: {
       type: DataTypes.STRING,
       allowNull: false,

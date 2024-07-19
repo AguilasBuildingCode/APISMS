@@ -77,24 +77,6 @@ SMS.init(
     keyType: DataTypes.UUID,
     foreignKey: "smsId",
   });
-  console.log(
-    JSON.stringify(
-      await SMS.findAll({
-        include: {
-          model: SMStatus,
-        },
-      })
-    )
-  );
-  // console.log(
-  //   JSON.stringify(
-  //     await SMS.findAll({
-  //       include: {
-  //         model: Users,
-  //       },
-  //     })
-  //   )
-  // );
 })();
 
 export default SMS;

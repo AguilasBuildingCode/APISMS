@@ -8,6 +8,7 @@ import SMStatus from "../../../../../db/models/sms_status_model";
 import { DeviceTypes } from "../../../../../enums/devices_types";
 import { SendersSMStatus } from "../../../../../enums/senders_sms_status";
 import Encrypt from "../../../../../security/encrypt";
+import Devices from "../../../../../db/models/devices_model";
 
 const sms = express.Router();
 const smsPath = "/sms";
@@ -67,11 +68,18 @@ sms.put("/register", async (req, res) => {
   }
 
   const smsSender = await SMSenderInfo.findAll({
+    attributes: ["deviceKindOfId"],
     where: {
       deviceKindOfId,
-      userId,
       model,
       id,
+    },
+    include: {
+      attributes: [],
+      model: Devices,
+      where: {
+        userId,
+      },
     },
   });
 
@@ -83,7 +91,6 @@ sms.put("/register", async (req, res) => {
   await Promise.all([
     await SMSenderInfo.create({
       deviceKindOfId,
-      userId,
       model,
       id,
       sdk: Encrypt.encrypt(sdk),
@@ -163,7 +170,7 @@ sms.post("/pending", async (req, res) => {
       ),
     });
   } catch (e: any) {
-    console.error(e)
+    console.error(e);
     res.status(500).json({ detail: e.message });
   }
 });

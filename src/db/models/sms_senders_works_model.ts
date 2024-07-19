@@ -15,13 +15,6 @@ SMSendersWork.init(
         isUUID: 4,
       },
     },
-    userId: {
-      type: DataTypes.UUID,
-      allowNull: false,
-      validate: {
-        isUUID: 4,
-      },
-    },
     status: {
       type: DataTypes.ENUM(SendersSMStatus.ONLINE, SendersSMStatus.OFFLINE),
       defaultValue: SendersSMStatus.OFFLINE,
