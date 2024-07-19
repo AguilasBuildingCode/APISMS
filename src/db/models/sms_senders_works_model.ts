@@ -1,10 +1,10 @@
 import { DataTypes, Model } from "sequelize";
-import { smsSequelize } from "../db/sequelize";
-import { SendersSMStatus } from "../enums/senders_sms_status";
+import { smsSequelize } from "../sequelize";
+import { SendersSMStatus } from "../../enums/senders_sms_status";
 
-class SendersSMSWork extends Model {}
+class SMSendersWork extends Model {}
 
-SendersSMSWork.init(
+SMSendersWork.init(
   {
     deviceKindOfId: {
       type: DataTypes.UUID,
@@ -59,10 +59,10 @@ SendersSMSWork.init(
   },
   {
     sequelize: smsSequelize,
-    modelName: "senders_sms_work",
+    modelName: "sms_senders_work",
   }
 );
 
-SendersSMSWork.sync();
+SMSendersWork.sync();
 
-export default SendersSMSWork;
+export default SMSendersWork;

@@ -1,10 +1,10 @@
 import express from "express";
 import { v4 as uuid } from "uuid";
-import SMSenderInfo from "../../../../../models/sms_sender_info_model";
-import Issue from "../../../../../models/issue_model";
-import SendersSMSWork from "../../../../../models/senders_sms_works_model";
+import SMSenderInfo from "../../../../../db/models/sms_sender_info_model";
+import Issue from "../../../../../db/models/issue_model";
+import SMSendersWork from "../../../../../db/models/sms_senders_works_model";
 import { Op } from "sequelize";
-import SMStatus from "../../../../../models/sms_status_model";
+import SMStatus from "../../../../../db/models/sms_status_model";
 import { DeviceTypes } from "../../../../../enums/devices_types";
 import { SendersSMStatus } from "../../../../../enums/senders_sms_status";
 import Encrypt from "../../../../../security/encrypt";
@@ -101,11 +101,11 @@ sms.put("/register", async (req, res) => {
       simCarrierIdName: Encrypt.encrypt(simCarrierIdName),
       simState: Encrypt.encrypt(simState),
       simOperator: Encrypt.encrypt(simOperator),
-      simCountryIso: Encrypt.encrypt(simCountryIso),
+      simCountryIso,
       simOperatorName: Encrypt.encrypt(simOperatorName),
       simSpecificCarrierIdName: Encrypt.encrypt(simSpecificCarrierIdName),
     }),
-    await SendersSMSWork.create({ deviceKindOfId, userId }),
+    await SMSendersWork.create({ deviceKindOfId, userId }),
   ]);
   res.status(200).json({});
 });
@@ -118,7 +118,7 @@ sms.post("/online", async (req, res) => {
   }
 
   try {
-    const [deviceStatus] = await SendersSMSWork.update(
+    const [deviceStatus] = await SMSendersWork.update(
       { status: SendersSMStatus.ONLINE },
       {
         where: {
@@ -148,38 +148,45 @@ sms.post("/pending", async (req, res) => {
   try {
     const smsPendings = (
       await SMStatus.findAll({
-        attributes: ["apiSMSId"],
-        group: ["apiSMSId"],
+        attributes: ["smsId"],
+        group: ["smsId"],
         where: {
-          apiSMSId: {
+          smsId: {
             [Op.in]: apiSMSIdsPending,
           },
         },
       })
-    ).map((smsPendings) => smsPendings.getDataValue("apiSMSId"));
+    ).map((smsPendings) => smsPendings.getDataValue("smsId"));
     res.status(200).json({
       apiSMSIdsPending: apiSMSIdsPending.filter(
-        (apiSMSId) => !smsPendings.includes(apiSMSId)
+        (smsId) => !smsPendings.includes(smsId)
       ),
     });
   } catch (e: any) {
+    console.error(e)
     res.status(500).json({ detail: e.message });
   }
 });
 
 sms.post("/update", async (req, res) => {
-  const { deviceKindOfId, apiSMSId, smsId, partNumber, totalParts, newStatus } =
-    req.body;
+  const {
+    deviceKindOfId,
+    smsId,
+    smsLocalId,
+    partNumber,
+    totalParts,
+    newStatus,
+  } = req.body;
   if (
-    typeof apiSMSId != "string" &&
     typeof smsId != "string" &&
+    typeof smsLocalId != "string" &&
     typeof partNumber != "number" &&
     typeof totalParts == "number" &&
     typeof newStatus != "string"
   ) {
     res.status(400).json({
       detail:
-        "Missing argument/s apiSMSId, smsId, partNumber, totalParts, newStatus",
+        "Missing argument/s smsId, smsLocalId, partNumber, totalParts, newStatus",
     });
     return;
   }
@@ -187,15 +194,14 @@ sms.post("/update", async (req, res) => {
   try {
     const smsStatus = await SMStatus.create({
       statusId: uuid(),
-      apiSMSId,
       smsId,
-      deviceKindOfId,
+      smsLocalId,
       partNumber,
       totalParts,
       newStatus,
     });
 
-    const [currentWork] = await SendersSMSWork.findOrCreate({
+    const [currentWork] = await SMSendersWork.findOrCreate({
       where: {
         deviceKindOfId,
       },
@@ -248,7 +254,7 @@ sms.post("/offline", async (req, res) => {
   }
 
   try {
-    const [deviceStatus] = await SendersSMSWork.update(
+    const [deviceStatus] = await SMSendersWork.update(
       { status: SendersSMStatus.OFFLINE },
       {
         where: {

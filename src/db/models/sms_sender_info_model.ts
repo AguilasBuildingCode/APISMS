@@ -1,5 +1,5 @@
 import { DataTypes, Model } from "sequelize";
-import { smsSequelize } from "../db/sequelize";
+import { smsSequelize } from "../sequelize";
 
 class SMSenderInfo extends Model {}
 
@@ -87,7 +87,11 @@ SMSenderInfo.init(
       type: DataTypes.STRING,
     },
     simOperatorName: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(5),
+      validate: {
+        min: 2,
+        max: 5,
+      },
     },
     simSpecificCarrierIdName: {
       type: DataTypes.STRING,

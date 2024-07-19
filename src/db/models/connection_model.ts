@@ -1,5 +1,5 @@
 import { DataTypes, Model } from "sequelize";
-import { smsSequelize } from "../db/sequelize";
+import { smsSequelize } from "../sequelize";
 
 class Connection extends Model {
     asUserInfo() {

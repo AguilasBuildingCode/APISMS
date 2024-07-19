@@ -1,6 +1,6 @@
 import { DataTypes, Model } from "sequelize";
-import { smsSequelize } from "../db/sequelize";
-import Encrypt from "../security/encrypt";
+import { smsSequelize } from "../sequelize";
+import Encrypt from "../../security/encrypt";
 
 class Business extends Model {}
 

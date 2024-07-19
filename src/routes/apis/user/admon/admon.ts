@@ -1,5 +1,5 @@
 import express from "express";
-import Devices from "../../../../models/devices_model";
+import Devices from "../../../../db/models/devices_model";
 import PsswdEncrypt from "../../../../security/passwd_encrypt";
 import { v4 as uuid } from 'uuid';
 import QRcode from "qrcode"

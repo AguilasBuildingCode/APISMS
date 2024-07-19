@@ -1,5 +1,5 @@
 import { DataTypes, Model } from "sequelize";
-import { smsSequelize } from "../db/sequelize";
+import { smsSequelize } from "../sequelize";
 
 class SMStatus extends Model {
     asUserInfo() {
@@ -18,19 +18,13 @@ SMStatus.init({
         validate: {
             isUUID: 4
         }
-    }, apiSMSId: {
-        type: DataTypes.UUID,
-        allowNull: false,
-        validate: {
-            isUUID: 4
-        }
     }, smsId: {
         type: DataTypes.UUID,
         allowNull: false,
         validate: {
             isUUID: 4
         }
-    }, deviceKindOfId: {
+    }, smsLocalId: {
         type: DataTypes.UUID,
         allowNull: false,
         validate: {

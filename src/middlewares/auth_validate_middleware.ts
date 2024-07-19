@@ -1,6 +1,6 @@
 import { RequestHandler } from "express";
 import JWT from "../security/jwt";
-import Connection from "../models/connection_model";
+import Connection from "../db/models/connection_model";
 import { Op } from "sequelize";
 
 const jwt = new JWT();

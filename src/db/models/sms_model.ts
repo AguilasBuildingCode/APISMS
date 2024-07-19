@@ -1,17 +1,17 @@
 import { DataTypes, Model } from "sequelize";
-import { smsSequelize } from "../db/sequelize";
+import { smsSequelize } from "../sequelize";
 
 class SMS extends Model {
   asUserInfo() {
     return {
-      apiSMSId: this.getDataValue("apiSMSId"),
+      smsId: this.getDataValue("smsId"),
     };
   }
 }
 
 SMS.init(
   {
-    apiSMSId: {
+    smsId: {
       type: DataTypes.UUID,
       primaryKey: true,
       allowNull: false,

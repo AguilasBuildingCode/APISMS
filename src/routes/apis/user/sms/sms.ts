@@ -1,8 +1,8 @@
 import { v4 as uuid } from "uuid";
 import express from "express";
-import SMS from "../../../../models/sms_model";
+import SMS from "../../../../db/models/sms_model";
 import Encrypt from "../../../../security/encrypt";
-import SendersSMSWork from "../../../../models/senders_sms_works_model";
+import SMSendersWork from "../../../../db/models/sms_senders_works_model";
 import { SendersSMStatus } from "../../../../enums/senders_sms_status";
 import io from "../../../..";
 
@@ -26,7 +26,7 @@ sms.put("/send", async (req, res) => {
   }
 
   try {
-    const betterSender = await SendersSMSWork.findOne({
+    const betterSender = await SMSendersWork.findOne({
       attributes: ["deviceKindOfId", "smsTotal", "smsPending"],
       where: {
         userId,
@@ -42,7 +42,7 @@ sms.put("/send", async (req, res) => {
 
     const deviceKindOfId = betterSender.getDataValue("deviceKindOfId");
     const currentSMS = await SMS.create({
-      apiSMSId: uuid(),
+      smsId: uuid(),
       userId,
       deviceKindOfId,
       countryCode,
@@ -51,7 +51,7 @@ sms.put("/send", async (req, res) => {
     });
 
     io.emit(`${deviceKindOfId}-sms-to-send`, {
-      apiSMSId: currentSMS.getDataValue("apiSMSId"),
+      smsId: currentSMS.getDataValue("smsId"),
       countryCode,
       number,
       message,

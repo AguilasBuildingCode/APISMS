@@ -1,6 +1,6 @@
 import { DataTypes, Model } from "sequelize";
-import { smsSequelize } from "../db/sequelize";
-import { DeviceTypes } from "../enums/devices_types";
+import { smsSequelize } from "../sequelize";
+import { DeviceTypes } from "../../enums/devices_types";
 
 class Devices extends Model {
   getAgentId() {
@@ -33,6 +33,7 @@ Devices.init(
     },
     deviceKindOfId: {
       type: DataTypes.UUID,
+      primaryKey: true,
       allowNull: false,
       validate: {
         isUUID: 4,

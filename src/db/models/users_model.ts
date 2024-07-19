@@ -1,8 +1,8 @@
 import { DataTypes, Model } from "sequelize";
-import { smsSequelize } from "../db/sequelize";
+import { smsSequelize } from "../sequelize";
 import { v4 as uuid } from "uuid";
-import PsswdEncrypt from "../security/passwd_encrypt";
-import Encrypt from "../security/encrypt";
+import PsswdEncrypt from "../../security/passwd_encrypt";
+import Encrypt from "../../security/encrypt";
 
 class Users extends Model {
   getAgentId() {
@@ -63,7 +63,8 @@ Users.init(
   }
 );
 
-Users.sync().finally(async () => {
+(async () => {
+  await Users.sync();
   try {
     await Users.findOrCreate({
       where: { userId: process.env.ROOT_USER_ID },
@@ -80,6 +81,6 @@ Users.sync().finally(async () => {
   } catch (e) {
     console.error(e);
   }
-});
+})();
 
 export default Users;

@@ -1,9 +1,9 @@
 import express, { RequestHandler } from "express";
 import JWT from "../../security/jwt";
-import Connection from "../../models/connection_model";
+import Connection from "../../db/models/connection_model";
 import authValidateMiddleware from "../../middlewares/auth_validate_middleware";
-import Users from "../../models/users_model";
-import Devices from "../../models/devices_model";
+import Users from "../../db/models/users_model";
+import Devices from "../../db/models/devices_model";
 import PsswdEncrypt from "../../security/passwd_encrypt";
 
 const jwt = new JWT();
