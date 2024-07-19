@@ -1,5 +1,6 @@
 import { DataTypes, Model } from "sequelize";
 import { smsSequelize } from "../sequelize";
+import Devices from "./devices_model";
 
 class SMSenderInfo extends Model {}
 
@@ -103,6 +104,13 @@ SMSenderInfo.init(
   }
 );
 
-SMSenderInfo.sync();
+(async () => {
+  await SMSenderInfo.sync();
+  SMSenderInfo.belongsTo(Devices, {
+    targetKey: "deviceKindOfId",
+    keyType: DataTypes.UUID,
+    foreignKey: "deviceKindOfId",
+  });
+})();
 
 export default SMSenderInfo;

@@ -3,6 +3,10 @@ import { smsSequelize } from "../sequelize";
 import { DeviceTypes } from "../../enums/devices_types";
 import Connection from "./connection_model";
 import SMS from "./sms_model";
+import Users from "./users_model";
+import SMSendersWork from "./sms_senders_works_model";
+import SMSenderInfo from "./sms_sender_info_model";
+import Issues from "./issue_model";
 
 class Devices extends Model {
   getAgentId() {
@@ -80,6 +84,7 @@ Devices.init(
 
 (async () => {
   await Devices.sync();
+  Devices.belongsTo(Users);
   Devices.hasMany(Connection, {
     sourceKey: "id",
     keyType: DataTypes.UUID,
@@ -90,15 +95,21 @@ Devices.init(
     keyType: DataTypes.UUID,
     foreignKey: "deviceKindOfId",
   });
-  // console.log(
-  //   JSON.stringify(
-  //     await Devices.findAll({
-  //       include: {
-  //         model: SMS,
-  //       },
-  //     })
-  //   )
-  // );
+  Devices.hasOne(SMSendersWork, {
+    sourceKey: "deviceKindOfId",
+    keyType: DataTypes.UUID,
+    foreignKey: "deviceKindOfId",
+  });
+  Devices.hasOne(SMSenderInfo, {
+    sourceKey: "deviceKindOfId",
+    keyType: DataTypes.UUID,
+    foreignKey: "deviceKindOfId",
+  });
+  Devices.hasOne(Issues, {
+    sourceKey: "deviceKindOfId",
+    keyType: DataTypes.UUID,
+    foreignKey: "deviceKindOfId",
+  });
 })();
 
 export default Devices;

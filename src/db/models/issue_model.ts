@@ -1,5 +1,6 @@
 import { DataTypes, Model } from "sequelize";
 import { smsSequelize } from "../sequelize";
+import Devices from "./devices_model";
 
 class Issues extends Model {
   asUserInfo() {
@@ -50,6 +51,13 @@ Issues.init(
   }
 );
 
-Issues.sync();
+(async () => {
+  await Issues.sync();
+  Issues.belongsTo(Devices, {
+    targetKey: "deviceKindOfId",
+    keyType: DataTypes.UUID,
+    foreignKey: "deviceKindOfId",
+  });
+})();
 
 export default Issues;

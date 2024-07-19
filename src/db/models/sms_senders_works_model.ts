@@ -1,6 +1,7 @@
 import { DataTypes, Model } from "sequelize";
 import { smsSequelize } from "../sequelize";
 import { SendersSMStatus } from "../../enums/senders_sms_status";
+import Devices from "./devices_model";
 
 class SMSendersWork extends Model {}
 
@@ -63,6 +64,13 @@ SMSendersWork.init(
   }
 );
 
-SMSendersWork.sync();
+(async () => {
+  await SMSendersWork.sync();
+  SMSendersWork.belongsTo(Devices, {
+    targetKey: "deviceKindOfId",
+    keyType: DataTypes.UUID,
+    foreignKey: "deviceKindOfId",
+  });
+})();
 
 export default SMSendersWork;

@@ -6,6 +6,7 @@ import PsswdEncrypt from "../../security/passwd_encrypt";
 import Business from "./business_model";
 import Connection from "./connection_model";
 import SMS from "./sms_model";
+import Devices from "./devices_model";
 
 class Users extends Model {
   getAgentId() {
@@ -68,22 +69,14 @@ Users.init(
 
 (async () => {
   await Users.sync();
+  Users.hasMany(SMS);
+  Users.hasMany(Devices);
   Users.belongsTo(Business);
   Users.hasMany(Connection, {
     sourceKey: "id",
     keyType: DataTypes.UUID,
     foreignKey: "agentId",
   });
-  Users.hasMany(SMS);
-  // console.log(
-  //   JSON.stringify(
-  //     await Users.findAll({
-  //       include: {
-  //         model: SMS,
-  //       },
-  //     })
-  //   )
-  // );
   try {
     await Users.findOrCreate({
       where: { id: process.env.ROOT_USER_ID },
