@@ -1,8 +1,8 @@
 import { RequestHandler } from "express";
 
 const userValidateMiddleware: RequestHandler<any> = (req, res, next) => {
-    const { userId, businessName, userName, password, type, attemptsLogin, locked } = req.body
-    if (typeof userId != "string" ||
+    const { id, businessName, userName, password, type, attemptsLogin, locked } = req.body
+    if (typeof id != "string" ||
         typeof businessName != "string" ||
         typeof userName != "string" ||
         typeof password != "string" ||

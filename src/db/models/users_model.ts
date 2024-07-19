@@ -2,17 +2,20 @@ import { DataTypes, Model } from "sequelize";
 import { smsSequelize } from "../sequelize";
 import { v4 as uuid } from "uuid";
 import PsswdEncrypt from "../../security/passwd_encrypt";
-import Encrypt from "../../security/encrypt";
+// import Encrypt from "../../security/encrypt";
+import Business from "./business_model";
+import Connection from "./connection_model";
+import SMS from "./sms_model";
 
 class Users extends Model {
   getAgentId() {
-    return this.getDataValue("userId");
+    return this.getDataValue("id");
   }
 }
 
 Users.init(
   {
-    userId: {
+    id: {
       type: DataTypes.UUID,
       primaryKey: true,
       allowNull: false,
@@ -65,12 +68,28 @@ Users.init(
 
 (async () => {
   await Users.sync();
+  Users.belongsTo(Business);
+  Users.hasMany(Connection, {
+    sourceKey: "id",
+    keyType: DataTypes.UUID,
+    foreignKey: "agentId",
+  });
+  Users.hasMany(SMS);
+  // console.log(
+  //   JSON.stringify(
+  //     await Users.findAll({
+  //       include: {
+  //         model: SMS,
+  //       },
+  //     })
+  //   )
+  // );
   try {
     await Users.findOrCreate({
-      where: { userId: process.env.ROOT_USER_ID },
+      where: { id: process.env.ROOT_USER_ID },
       defaults: {
-        userId: process.env.ROOT_USER_ID,
-        businessName: Encrypt.encrypt(process.env.BUSSINES_NAME ?? "N/A"),
+        id: process.env.ROOT_USER_ID,
+        businessName: process.env.BUSSINES_NAME ?? "N/A",
         userName: process.env.ROOT_USER_NAME,
         password: await PsswdEncrypt.hash(
           process.env.ROOT_USER_PASSWORD ?? uuid()

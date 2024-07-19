@@ -1,17 +1,20 @@
 import { DataTypes, Model } from "sequelize";
 import { smsSequelize } from "../sequelize";
+import Users from "./users_model";
+import Devices from "./devices_model";
+import SMStatus from "./sms_status_model";
 
 class SMS extends Model {
   asUserInfo() {
     return {
-      smsId: this.getDataValue("smsId"),
+      id: this.getDataValue("id"),
     };
   }
 }
 
 SMS.init(
   {
-    smsId: {
+    id: {
       type: DataTypes.UUID,
       primaryKey: true,
       allowNull: false,
@@ -61,6 +64,37 @@ SMS.init(
   }
 );
 
-SMS.sync();
+(async () => {
+  await SMS.sync();
+  SMS.belongsTo(Users);
+  SMS.belongsTo(Devices, {
+    targetKey: "deviceKindOfId",
+    keyType: DataTypes.UUID,
+    foreignKey: "deviceKindOfId",
+  });
+  SMS.hasMany(SMStatus, {
+    sourceKey: "id",
+    keyType: DataTypes.UUID,
+    foreignKey: "smsId",
+  });
+  console.log(
+    JSON.stringify(
+      await SMS.findAll({
+        include: {
+          model: SMStatus,
+        },
+      })
+    )
+  );
+  // console.log(
+  //   JSON.stringify(
+  //     await SMS.findAll({
+  //       include: {
+  //         model: Users,
+  //       },
+  //     })
+  //   )
+  // );
+})();
 
 export default SMS;

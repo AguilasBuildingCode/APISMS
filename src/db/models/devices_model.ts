@@ -1,14 +1,16 @@
 import { DataTypes, Model } from "sequelize";
 import { smsSequelize } from "../sequelize";
 import { DeviceTypes } from "../../enums/devices_types";
+import Connection from "./connection_model";
+import SMS from "./sms_model";
 
 class Devices extends Model {
   getAgentId() {
-    return this.getDataValue("deviceId");
+    return this.getDataValue("id");
   }
   asUserInfo() {
     return {
-      deviceId: this.getDataValue("deviceId"),
+      id: this.getDataValue("id"),
       deviceKindOfId: this.getDataValue("deviceKindOfId"),
     };
   }
@@ -16,7 +18,7 @@ class Devices extends Model {
 
 Devices.init(
   {
-    deviceId: {
+    id: {
       type: DataTypes.UUID,
       primaryKey: true,
       allowNull: false,
@@ -56,8 +58,8 @@ Devices.init(
       type: DataTypes.STRING,
       allowNull: false,
       validate: {
-        min: 8
-      }
+        min: 8,
+      },
     },
     attemptsLogin: {
       type: DataTypes.TINYINT,
@@ -76,6 +78,27 @@ Devices.init(
   }
 );
 
-Devices.sync();
+(async () => {
+  await Devices.sync();
+  Devices.hasMany(Connection, {
+    sourceKey: "id",
+    keyType: DataTypes.UUID,
+    foreignKey: "agentId",
+  });
+  Devices.hasMany(SMS, {
+    sourceKey: "deviceKindOfId",
+    keyType: DataTypes.UUID,
+    foreignKey: "deviceKindOfId",
+  });
+  // console.log(
+  //   JSON.stringify(
+  //     await Devices.findAll({
+  //       include: {
+  //         model: SMS,
+  //       },
+  //     })
+  //   )
+  // );
+})();
 
 export default Devices;

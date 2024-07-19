@@ -10,7 +10,7 @@ const sms = express.Router();
 const smsPath = "/sms";
 
 sms.put("/send", async (req, res) => {
-  const { userId, countryCode, number, message } = req.body;
+  const { id, countryCode, number, message } = req.body;
   if (
     typeof countryCode != "string" ||
     countryCode.length != 2 ||
@@ -29,7 +29,7 @@ sms.put("/send", async (req, res) => {
     const betterSender = await SMSendersWork.findOne({
       attributes: ["deviceKindOfId", "smsTotal", "smsPending"],
       where: {
-        userId,
+        userId: id,
         status: SendersSMStatus.ONLINE,
       },
       order: [["score", "DESC"]],
@@ -42,8 +42,8 @@ sms.put("/send", async (req, res) => {
 
     const deviceKindOfId = betterSender.getDataValue("deviceKindOfId");
     const currentSMS = await SMS.create({
-      smsId: uuid(),
-      userId,
+      id: uuid(),
+      userId: id,
       deviceKindOfId,
       countryCode,
       number: Encrypt.encrypt(number),
@@ -51,7 +51,7 @@ sms.put("/send", async (req, res) => {
     });
 
     io.emit(`${deviceKindOfId}-sms-to-send`, {
-      smsId: currentSMS.getDataValue("smsId"),
+      smsId: currentSMS.getDataValue("id"),
       countryCode,
       number,
       message,

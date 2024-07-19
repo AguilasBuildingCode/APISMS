@@ -1,7 +1,7 @@
 import express from "express";
 import { v4 as uuid } from "uuid";
 import SMSenderInfo from "../../../../../db/models/sms_sender_info_model";
-import Issue from "../../../../../db/models/issue_model";
+import Issues from "../../../../../db/models/issue_model";
 import SMSendersWork from "../../../../../db/models/sms_senders_works_model";
 import { Op } from "sequelize";
 import SMStatus from "../../../../../db/models/sms_status_model";
@@ -193,7 +193,7 @@ sms.post("/update", async (req, res) => {
 
   try {
     const smsStatus = await SMStatus.create({
-      statusId: uuid(),
+      id: uuid(),
       smsId,
       smsLocalId,
       partNumber,
@@ -288,8 +288,8 @@ sms.post("/issue", async (req, res) => {
   }
 
   try {
-    const issue = await Issue.create({
-      apiSMSidIssue: uuid(),
+    const issue = await Issues.create({
+      id: uuid(),
       deviceKindOfId,
       code,
       message,

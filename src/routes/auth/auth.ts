@@ -99,7 +99,7 @@ auth.post("/login", async (req, res) => {
       });
       res
         .status(401)
-        .json({ detail: "Invalid userId and/or userName and/or password" });
+        .json({ detail: "Invalid agentId and/or userName and/or password" });
       return;
     }
 

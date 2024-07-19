@@ -37,12 +37,12 @@ const authValidateMiddleware: RequestHandler<any> = async (req, res, next) => {
       parentAgent = jwt.decode(agent.parentToken);
     }
 
+    console.log(JSON.stringify(agent))
+
     req.body = {
       agentId:
-        (agent as any).userId ||
-        parentAgent.userId ||
-        (agent as any).deviceId ||
-        parentAgent.deviceId,
+        (agent as any).id ||
+        parentAgent.id,
       ...agent,
       ...parentAgent,
       token: splitedToke[1],
@@ -51,6 +51,7 @@ const authValidateMiddleware: RequestHandler<any> = async (req, res, next) => {
     };
     next();
   } catch (e: any) {
+    console.error(e);
     res.status(401).json({ detail: e.message });
   }
 };

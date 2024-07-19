@@ -1,12 +1,13 @@
 import { DataTypes, Model } from "sequelize";
 import { smsSequelize } from "../sequelize";
 import Encrypt from "../../security/encrypt";
+import Users from "./users_model";
 
 class Business extends Model {}
 
 Business.init(
   {
-    businessName: {
+    name: {
       type: DataTypes.STRING,
       primaryKey: true,
       allowNull: false,
@@ -28,18 +29,23 @@ Business.init(
   }
 );
 
-Business.sync().finally(async () => {
+(async () => {
+  await Business.sync();
+  Business.hasOne(Users, {
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  })
   try {
     await Business.findOrCreate({
-      where: { businessName: process.env.BUSSINES_NAME },
+      where: { name: process.env.BUSSINES_NAME },
       defaults: {
-        businessName: Encrypt.encrypt(process.env.BUSSINES_NAME ?? "N/A"),
+        name: process.env.BUSSINES_NAME,
         legalRep: Encrypt.encrypt(process.env.LEGAL_REP ?? "N/A"),
       },
     });
   } catch (e) {
     console.error(e);
   }
-});
+})();
 
 export default Business;
