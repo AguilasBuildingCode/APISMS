@@ -1,11 +1,9 @@
 import { RequestHandler } from "express";
 
 const deviceValidateMiddleWare: RequestHandler<any> = (req, res, next) => {
-    const { id, userId, deviceKindOfId, kind, userName, password, attemptsLogin } = req.body
+    const { id, userId, userName, password, attemptsLogin } = req.body
     if (typeof id != "string" ||
         typeof userId != "string" ||
-        typeof deviceKindOfId != "string" ||
-        typeof kind != "string" ||
         typeof userName != "string" ||
         typeof password != "string" ||
         typeof attemptsLogin != "number") {

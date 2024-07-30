@@ -5,7 +5,6 @@ import Issues from "../../../../../db/models/issue_model";
 import SMSendersWork from "../../../../../db/models/sms_senders_works_model";
 import { Op } from "sequelize";
 import SMStatus from "../../../../../db/models/sms_status_model";
-import { DeviceTypes } from "../../../../../enums/devices_types";
 import { SendersSMStatus } from "../../../../../enums/senders_sms_status";
 import Encrypt from "../../../../../security/encrypt";
 import Devices from "../../../../../db/models/devices_model";
@@ -15,8 +14,7 @@ const smsPath = "/sms";
 
 sms.put("/register", async (req, res) => {
   const {
-    deviceKindOfId,
-    kind,
+    agentId,
     userId,
     model,
     id,
@@ -40,8 +38,7 @@ sms.put("/register", async (req, res) => {
     simSpecificCarrierIdName,
   } = req.body;
   if (
-    typeof deviceKindOfId != "string" ||
-    typeof kind != "string" ||
+    typeof agentId != "string" ||
     typeof model != "string" ||
     typeof id != "string" ||
     typeof sdk != "number" ||
@@ -62,15 +59,10 @@ sms.put("/register", async (req, res) => {
     return;
   }
 
-  if (kind != DeviceTypes.SMS_SENDER) {
-    res.status(403).json({ detail: "Invalid device" });
-    return;
-  }
-
   const smsSender = await SMSenderInfo.findAll({
-    attributes: ["deviceKindOfId"],
+    attributes: ["deviceId"],
     where: {
-      deviceKindOfId,
+      deviceId: agentId,
       model,
       id,
     },
@@ -90,7 +82,7 @@ sms.put("/register", async (req, res) => {
 
   await Promise.all([
     await SMSenderInfo.create({
-      deviceKindOfId,
+      deviceId: agentId,
       model,
       id,
       sdk: Encrypt.encrypt(sdk),
@@ -112,15 +104,15 @@ sms.put("/register", async (req, res) => {
       simOperatorName: Encrypt.encrypt(simOperatorName),
       simSpecificCarrierIdName: Encrypt.encrypt(simSpecificCarrierIdName),
     }),
-    await SMSendersWork.create({ deviceKindOfId, userId }),
+    await SMSendersWork.create({ deviceId: agentId, userId }),
   ]);
   res.status(200).json({});
 });
 
 sms.post("/online", async (req, res) => {
-  const { deviceKindOfId } = req.body;
-  if (typeof deviceKindOfId != "string" || deviceKindOfId == "") {
-    res.status(400).json({ detail: "Missining and/or invalid deviceKindOfId" });
+  const { agentId } = req.body;
+  if (typeof agentId != "string" || agentId == "") {
+    res.status(400).json({ detail: "Missining and/or invalid deviceId" });
     return;
   }
 
@@ -129,7 +121,7 @@ sms.post("/online", async (req, res) => {
       { status: SendersSMStatus.ONLINE },
       {
         where: {
-          deviceKindOfId,
+          deviceId: agentId,
         },
       }
     );
@@ -177,23 +169,23 @@ sms.post("/pending", async (req, res) => {
 
 sms.post("/update", async (req, res) => {
   const {
-    deviceKindOfId,
+    agentId,
     smsId,
     smsLocalId,
     partNumber,
     totalParts,
-    newStatus,
+    status,
   } = req.body;
   if (
     typeof smsId != "string" &&
     typeof smsLocalId != "string" &&
     typeof partNumber != "number" &&
     typeof totalParts == "number" &&
-    typeof newStatus != "string"
+    typeof status != "string"
   ) {
     res.status(400).json({
       detail:
-        "Missing argument/s smsId, smsLocalId, partNumber, totalParts, newStatus",
+        "Missing argument/s smsId, smsLocalId, partNumber, totalParts, status",
     });
     return;
   }
@@ -205,12 +197,12 @@ sms.post("/update", async (req, res) => {
       smsLocalId,
       partNumber,
       totalParts,
-      newStatus,
+      status,
     });
 
     const [currentWork] = await SMSendersWork.findOrCreate({
       where: {
-        deviceKindOfId,
+        deviceId: agentId,
       },
     });
 
@@ -222,7 +214,7 @@ sms.post("/update", async (req, res) => {
       smsFailed: currentWork.getDataValue("smsFailed"),
     };
     smsPending = smsPending - 1;
-    switch (newStatus) {
+    switch (status) {
       case "SEND":
         smsSend = smsSend + 1;
         currentWork.update({
@@ -254,9 +246,9 @@ sms.post("/update", async (req, res) => {
 });
 
 sms.post("/offline", async (req, res) => {
-  const { deviceKindOfId } = req.body;
-  if (typeof deviceKindOfId != "string" || deviceKindOfId == "") {
-    res.status(400).json({ detail: "Missining and/or invalid deviceKindOfId" });
+  const { agentId } = req.body;
+  if (typeof agentId != "string" || agentId == "") {
+    res.status(400).json({ detail: "Missining and/or invalid deviceId" });
     return;
   }
 
@@ -265,7 +257,7 @@ sms.post("/offline", async (req, res) => {
       { status: SendersSMStatus.OFFLINE },
       {
         where: {
-          deviceKindOfId,
+          deviceId: agentId,
         },
       }
     );
@@ -282,9 +274,9 @@ sms.post("/offline", async (req, res) => {
 });
 
 sms.post("/issue", async (req, res) => {
-  const { deviceKindOfId } = req.body;
-  if (typeof deviceKindOfId != "string" || deviceKindOfId == "") {
-    res.status(400).json({ detail: "Missining and/or invalid deviceKindOfId" });
+  const { agentId } = req.body;
+  if (typeof agentId != "string" || agentId == "") {
+    res.status(400).json({ detail: "Missining and/or invalid agentId" });
     return;
   }
 
@@ -297,7 +289,7 @@ sms.post("/issue", async (req, res) => {
   try {
     const issue = await Issues.create({
       id: uuid(),
-      deviceKindOfId,
+      deviceId: agentId,
       code,
       message,
       detail,

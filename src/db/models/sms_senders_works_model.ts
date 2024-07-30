@@ -7,7 +7,7 @@ class SMSendersWork extends Model {}
 
 SMSendersWork.init(
   {
-    deviceKindOfId: {
+    deviceId: {
       type: DataTypes.UUID,
       primaryKey: true,
       allowNull: false,
@@ -59,11 +59,7 @@ SMSendersWork.init(
 
 (async () => {
   await SMSendersWork.sync();
-  SMSendersWork.belongsTo(Devices, {
-    targetKey: "deviceKindOfId",
-    keyType: DataTypes.UUID,
-    foreignKey: "deviceKindOfId",
-  });
+  SMSendersWork.belongsTo(Devices);
 })();
 
 export default SMSendersWork;

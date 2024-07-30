@@ -43,7 +43,7 @@ SMStatus.init(
       type: DataTypes.TINYINT,
       allowNull: false,
     },
-    newStatus: {
+    status: {
       type: DataTypes.STRING,
       allowNull: false,
     },

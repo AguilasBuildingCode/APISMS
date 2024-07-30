@@ -6,7 +6,7 @@ class SMSenderInfo extends Model {}
 
 SMSenderInfo.init(
   {
-    deviceKindOfId: {
+    deviceId: {
       type: DataTypes.UUID,
       primaryKey: true,
       allowNull: false,
@@ -99,11 +99,7 @@ SMSenderInfo.init(
 
 (async () => {
   await SMSenderInfo.sync();
-  SMSenderInfo.belongsTo(Devices, {
-    targetKey: "deviceKindOfId",
-    keyType: DataTypes.UUID,
-    foreignKey: "deviceKindOfId",
-  });
+  SMSenderInfo.belongsTo(Devices);
 })();
 
 export default SMSenderInfo;

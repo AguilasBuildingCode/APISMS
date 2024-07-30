@@ -29,7 +29,7 @@ sms.put("/send", async (req, res) => {
 
   try {
     const betterSender = await SMSendersWork.findOne({
-      attributes: ["deviceKindOfId", "smsTotal", "smsPending"],
+      attributes: ["deviceId", "smsTotal", "smsPending"],
       where: {
         status: SendersSMStatus.ONLINE,
       },
@@ -48,17 +48,17 @@ sms.put("/send", async (req, res) => {
       return;
     }
 
-    const deviceKindOfId = betterSender.getDataValue("deviceKindOfId");
+    const deviceId = betterSender.getDataValue("deviceId");
     const currentSMS = await SMS.create({
       id: uuid(),
       userId: id,
-      deviceKindOfId,
+      deviceId,
       countryCode,
       number: Encrypt.encrypt(number),
       message: Encrypt.encrypt(message),
     });
 
-    io.emit(`${deviceKindOfId}-sms-to-send`, {
+    io.emit(`${deviceId}-sms-to-send`, {
       smsId: currentSMS.getDataValue("id"),
       countryCode,
       number,

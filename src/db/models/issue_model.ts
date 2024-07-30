@@ -20,7 +20,7 @@ Issues.init(
         isUUID: 4,
       },
     },
-    deviceKindOfId: {
+    deviceId: {
       type: DataTypes.UUID,
       allowNull: false,
       validate: {
@@ -53,11 +53,7 @@ Issues.init(
 
 (async () => {
   await Issues.sync();
-  Issues.belongsTo(Devices, {
-    targetKey: "deviceKindOfId",
-    keyType: DataTypes.UUID,
-    foreignKey: "deviceKindOfId",
-  });
+  Issues.belongsTo(Devices);
 })();
 
 export default Issues;

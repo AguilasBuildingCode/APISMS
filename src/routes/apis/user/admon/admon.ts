@@ -9,10 +9,9 @@ const admon = express.Router();
 const admonPath = "/admon";
 
 admon.put("/devices", async (req, res) => {
-  const { id, kind, userName, password } = req.body;
+  const { id, userName, password } = req.body;
 
   if (
-    typeof kind != "string" ||
     typeof userName != "string" ||
     typeof password != "string" ||
     password.length < 8
@@ -20,7 +19,7 @@ admon.put("/devices", async (req, res) => {
     res
       .status(400)
       .json({
-        detail: "Missing or invalid kind and/or userName andor password",
+        detail: "Missing or invalid userName and/or password",
       });
     return;
   }
@@ -29,7 +28,6 @@ admon.put("/devices", async (req, res) => {
     const registedDevice = await Devices.findOne({
       where: {
         userId: id,
-        kind,
         userName,
       },
     });
@@ -40,14 +38,11 @@ admon.put("/devices", async (req, res) => {
     }
 
     const deviceId = uuid();
-    const deviceKindOfId = uuid();
     const tmpPassword = await PsswdEncrypt.hash(password);
 
     const device = await Devices.create({
       id: deviceId,
       userId: id,
-      deviceKindOfId,
-      kind,
       userName,
       password: tmpPassword,
     });
@@ -55,7 +50,6 @@ admon.put("/devices", async (req, res) => {
       `${uuid()}.png`,
       id,
       deviceId,
-      deviceKindOfId,
       userName
     );
     await QRcode.toFile(

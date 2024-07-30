@@ -29,7 +29,7 @@ SMS.init(
         isUUID: 4,
       },
     },
-    deviceKindOfId: {
+    deviceId: {
       type: DataTypes.UUID,
       allowNull: false,
       validate: {
@@ -67,11 +67,7 @@ SMS.init(
 (async () => {
   await SMS.sync();
   SMS.belongsTo(Users);
-  SMS.belongsTo(Devices, {
-    targetKey: "deviceKindOfId",
-    keyType: DataTypes.UUID,
-    foreignKey: "deviceKindOfId",
-  });
+  SMS.belongsTo(Devices);
   SMS.hasMany(SMStatus, {
     sourceKey: "id",
     keyType: DataTypes.UUID,

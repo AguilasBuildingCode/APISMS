@@ -322,7 +322,7 @@
 										"header": [],
 										"body": {
 											"mode": "raw",
-											"raw": "{\n    \"kind\": \"SMS_SENDER\",\n    \"userName\": \"{{deviceUserName}}\",\n    \"password\": \"{{devicePassword}}\"\n}",
+											"raw": "{\n    \"userName\": \"{{deviceUserName}}\",\n    \"password\": \"{{devicePassword}}\"\n}",
 											"options": {
 												"raw": {
 													"language": "json"
@@ -530,7 +530,7 @@
 												"header": [],
 												"body": {
 													"mode": "raw",
-													"raw": "{\n    \"smsId\": \"51e1feff-067e-4387-8a37-fafd38c0268e\",\n    \"smsLocalId\": \"fb9c2227-b3c1-4fcf-9ee6-fc7b37f152c3\",\n    \"partNumber\": 1,\n    \"totalParts\": 2,\n    \"newStatus\": \"DELIVERED\"\n}",
+													"raw": "{\n    \"smsId\": \"51e1feff-067e-4387-8a37-fafd38c0268e\",\n    \"smsLocalId\": \"fb9c2227-b3c1-4fcf-9ee6-fc7b37f152c3\",\n    \"partNumber\": 1,\n    \"totalParts\": 2,\n    \"status\": \"DELIVERED\"\n}",
 													"options": {
 														"raw": {
 															"language": "json"

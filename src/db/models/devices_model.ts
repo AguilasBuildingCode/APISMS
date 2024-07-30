@@ -1,6 +1,5 @@
 import { DataTypes, Model } from "sequelize";
 import { smsSequelize } from "../sequelize";
-import { DeviceTypes } from "../../enums/devices_types";
 import Connection from "./connection_model";
 import SMS from "./sms_model";
 import Users from "./users_model";
@@ -15,7 +14,6 @@ class Devices extends Model {
   asUserInfo() {
     return {
       id: this.getDataValue("id"),
-      deviceKindOfId: this.getDataValue("deviceKindOfId"),
     };
   }
 }
@@ -36,19 +34,6 @@ Devices.init(
       validate: {
         isUUID: 4,
       },
-    },
-    deviceKindOfId: {
-      type: DataTypes.UUID,
-      primaryKey: true,
-      allowNull: false,
-      validate: {
-        isUUID: 4,
-      },
-    },
-    kind: {
-      type: DataTypes.ENUM(DeviceTypes.SMS_SENDER),
-      defaultValue: DeviceTypes.SMS_SENDER,
-      allowNull: false,
     },
     userName: {
       type: DataTypes.STRING,
@@ -90,26 +75,10 @@ Devices.init(
     keyType: DataTypes.UUID,
     foreignKey: "agentId",
   });
-  Devices.hasMany(SMS, {
-    sourceKey: "deviceKindOfId",
-    keyType: DataTypes.UUID,
-    foreignKey: "deviceKindOfId",
-  });
-  Devices.hasOne(SMSendersWork, {
-    sourceKey: "deviceKindOfId",
-    keyType: DataTypes.UUID,
-    foreignKey: "deviceKindOfId",
-  });
-  Devices.hasOne(SMSenderInfo, {
-    sourceKey: "deviceKindOfId",
-    keyType: DataTypes.UUID,
-    foreignKey: "deviceKindOfId",
-  });
-  Devices.hasOne(Issues, {
-    sourceKey: "deviceKindOfId",
-    keyType: DataTypes.UUID,
-    foreignKey: "deviceKindOfId",
-  });
+  Devices.hasMany(SMS);
+  Devices.hasOne(SMSendersWork);
+  Devices.hasOne(SMSenderInfo);
+  Devices.hasOne(Issues);
 })();
 
 export default Devices;
