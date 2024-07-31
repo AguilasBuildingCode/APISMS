@@ -1,9 +1,9 @@
 import express from "express";
-import Devices from "../../../../db/models/devices_model";
-import PsswdEncrypt from "../../../../security/passwd_encrypt";
+import Devices from "../../../../../db/models/devices_model";
+import PsswdEncrypt from "../../../../../security/passwd_encrypt";
 import { v4 as uuid } from "uuid";
 import QRcode from "qrcode";
-import Utils from "../../../../utils/utils";
+import Utils from "../../../../../utils/utils";
 
 const admon = express.Router();
 const admonPath = "/admon";
@@ -57,7 +57,7 @@ admon.put("/devices", async (req, res) => {
       JSON.stringify({ ...device.asUserInfo(), userName, password }),
       { type: "png" }
     );
-    res.status(200).sendFile(qrPath);
+    res.status(201).sendFile(qrPath);
   } catch (e: any) {
     console.error(e);
     res.status(400).json({ detail: e.message });

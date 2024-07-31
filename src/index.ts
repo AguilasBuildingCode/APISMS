@@ -8,6 +8,7 @@ import { Server } from "socket.io";
 import { apis, apisPath } from "./routes/apis/apis";
 import { auth, authMiddleware, authPath } from "./routes/auth/auth";
 import authValidateMiddleware from "./middlewares/auth_validate_middleware";
+import authValidateSocketMiddleware from "./middlewares/auth_validate_socket_middleware";
 
 const config = Config.getInstance();
 config
@@ -51,13 +52,13 @@ if (config.getEnv() === EnvTypes.PROD) {
       .listen(portAPIHTTPS, () => {
         console.log(`Server run on port: ${portAPIHTTPS}`);
       })
-  );
+  ).use(authValidateSocketMiddleware);
 } else {
   io.attach(
     http.createServer(app).listen(portAPIHTTP, () => {
       console.log(`Server run on port: ${portAPIHTTP}`);
     })
-  );
+  ).use(authValidateSocketMiddleware);
 }
 
 export default io;

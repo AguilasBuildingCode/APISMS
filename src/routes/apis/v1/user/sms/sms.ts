@@ -1,12 +1,12 @@
 import { v4 as uuid } from "uuid";
 import express from "express";
-import SMS from "../../../../db/models/sms_model";
-import Encrypt from "../../../../security/encrypt";
-import SMSendersWork from "../../../../db/models/sms_senders_works_model";
-import { SendersSMStatus } from "../../../../enums/senders_sms_status";
-import io from "../../../..";
-import Devices from "../../../../db/models/devices_model";
-import { smsSequelize } from "../../../../db/sequelize";
+import SMS from "../../../../../db/models/sms_model";
+import Encrypt from "../../../../../security/encrypt";
+import SMSendersWork from "../../../../../db/models/sms_senders_works_model";
+import { SendersSMStatus } from "../../../../../enums/senders_sms_status";
+import io from "../../../../..";
+import Devices from "../../../../../db/models/devices_model";
+import { smsSequelize } from "../../../../../db/sequelize";
 
 const sms = express.Router();
 const smsPath = "/sms";
@@ -68,7 +68,7 @@ sms.put("/send", async (req, res) => {
       smsTotal: Number(betterSender.getDataValue("smsTotal")) + 1,
       smsPending: Number(betterSender.getDataValue("smsPending")) + 1,
     });
-    res.status(200).json(currentSMS.asUserInfo());
+    res.status(201).json(currentSMS.asUserInfo());
   } catch (e: any) {
     res.status(500).json({ detail: e.message });
   }

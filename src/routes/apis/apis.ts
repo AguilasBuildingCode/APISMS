@@ -1,13 +1,9 @@
 import express from "express";
-import deviceValidateMiddleWare from "./device/senders/middlewares/device_validate_middleware";
-import userValidateMiddleware from '../../middlewares/user_validate_middleware';
-import { user, userPath } from "./user/user";
-import { device, devicePath } from "./device/device";
+import { v1, v1Path } from "./v1/v1";
 
 const apis = express.Router();
 const apisPath = "/apis"
 
-apis.use(userPath, userValidateMiddleware, user)
-apis.use(devicePath, deviceValidateMiddleWare, device)
+apis.use(v1Path, v1)
 
 export { apis, apisPath }

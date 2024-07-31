@@ -1,13 +1,13 @@
 import express from "express";
 import { v4 as uuid } from "uuid";
-import SMSenderInfo from "../../../../../db/models/sms_sender_info_model";
-import Issues from "../../../../../db/models/issue_model";
-import SMSendersWork from "../../../../../db/models/sms_senders_works_model";
+import SMSenderInfo from "../../../../../../db/models/sms_sender_info_model";
+import Issues from "../../../../../../db/models/issue_model";
+import SMSendersWork from "../../../../../../db/models/sms_senders_works_model";
 import { Op } from "sequelize";
-import SMStatus from "../../../../../db/models/sms_status_model";
-import { SendersSMStatus } from "../../../../../enums/senders_sms_status";
-import Encrypt from "../../../../../security/encrypt";
-import Devices from "../../../../../db/models/devices_model";
+import SMStatus from "../../../../../../db/models/sms_status_model";
+import { SendersSMStatus } from "../../../../../../enums/senders_sms_status";
+import Encrypt from "../../../../../../security/encrypt";
+import Devices from "../../../../../../db/models/devices_model";
 
 const sms = express.Router();
 const smsPath = "/sms";
@@ -59,7 +59,7 @@ sms.put("/register", async (req, res) => {
     return;
   }
 
-  const smsSender = await SMSenderInfo.findAll({
+  const smsSender = await SMSenderInfo.findOne({
     attributes: ["deviceId"],
     where: {
       deviceId: agentId,
@@ -75,8 +75,23 @@ sms.put("/register", async (req, res) => {
     },
   });
 
-  if (smsSender.length > 0) {
-    res.status(400).json({ detail: "SMS Sender already registred" });
+  if (smsSender) {
+    smsSender.update({
+      sdk: Encrypt.encrypt(sdk),
+      userName: Encrypt.encrypt(userName),
+      type: Encrypt.encrypt(type),
+      appVersionCode: Encrypt.encrypt(appVersionCode),
+      appVersionName: Encrypt.encrypt(appVersionName),
+      carrierIdFromSimMccMnc: Encrypt.encrypt(carrierIdFromSimMccMnc),
+      simCarrierId: Encrypt.encrypt(simCarrierId),
+      simCarrierIdName: Encrypt.encrypt(simCarrierIdName),
+      simState: Encrypt.encrypt(simState),
+      simOperator: Encrypt.encrypt(simOperator),
+      simCountryIso,
+      simOperatorName: Encrypt.encrypt(simOperatorName),
+      simSpecificCarrierIdName: Encrypt.encrypt(simSpecificCarrierIdName),
+    })
+    res.status(200).json({ });
     return;
   }
 
@@ -106,7 +121,7 @@ sms.put("/register", async (req, res) => {
     }),
     await SMSendersWork.create({ deviceId: agentId, userId }),
   ]);
-  res.status(200).json({});
+  res.status(201).json({});
 });
 
 sms.post("/online", async (req, res) => {
@@ -239,7 +254,7 @@ sms.post("/update", async (req, res) => {
         break;
     }
 
-    res.status(200).json(smsStatus.asUserInfo());
+    res.status(201).json(smsStatus.asUserInfo());
   } catch (e: any) {
     res.status(500).json({ detail: e.message });
   }
@@ -296,7 +311,7 @@ sms.post("/issue", async (req, res) => {
       path,
       isBodyEmpty,
     });
-    res.status(200).json(issue.asUserInfo());
+    res.status(201).json(issue.asUserInfo());
   } catch (e: any) {
     res.status(500).json({ detail: e.message });
   }
