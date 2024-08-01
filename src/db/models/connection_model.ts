@@ -38,7 +38,7 @@ Connection.init(
       allowNull: false,
     },
     expireAt: {
-      type: DataTypes.NUMBER,
+      type: DataTypes.BIGINT,
       allowNull: false,
     },
   },
