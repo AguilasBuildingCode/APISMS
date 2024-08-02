@@ -255,118 +255,23 @@
 			"name": "apis",
 			"item": [
 				{
-					"name": "user",
+					"name": "v1",
 					"item": [
 						{
-							"name": "sms",
-							"item": [
-								{
-									"name": "/send",
-									"request": {
-										"auth": {
-											"type": "bearer",
-											"bearer": [
-												{
-													"key": "token",
-													"value": "{{admon_token}}",
-													"type": "string"
-												}
-											]
-										},
-										"method": "PUT",
-										"header": [],
-										"body": {
-											"mode": "raw",
-											"raw": "{\n    \"countryCode\": \"MX\",\n    \"number\": \"3461072766\",\n    \"message\": \"Helo API SMS\"\n}",
-											"options": {
-												"raw": {
-													"language": "json"
-												}
-											}
-										},
-										"url": {
-											"raw": "{{protocol}}://{{host}}/apis/user/sms/send",
-											"protocol": "{{protocol}}",
-											"host": [
-												"{{host}}"
-											],
-											"path": [
-												"apis",
-												"user",
-												"sms",
-												"send"
-											]
-										}
-									},
-									"response": []
-								}
-							]
-						},
-						{
-							"name": "admon",
-							"item": [
-								{
-									"name": "/devices",
-									"request": {
-										"auth": {
-											"type": "bearer",
-											"bearer": [
-												{
-													"key": "token",
-													"value": "{{admon_token}}",
-													"type": "string"
-												}
-											]
-										},
-										"method": "PUT",
-										"header": [],
-										"body": {
-											"mode": "raw",
-											"raw": "{\n    \"userName\": \"{{deviceUserName}}\",\n    \"password\": \"{{devicePassword}}\"\n}",
-											"options": {
-												"raw": {
-													"language": "json"
-												}
-											}
-										},
-										"url": {
-											"raw": "{{protocol}}://{{host}}/apis/user/admon/devices",
-											"protocol": "{{protocol}}",
-											"host": [
-												"{{host}}"
-											],
-											"path": [
-												"apis",
-												"user",
-												"admon",
-												"devices"
-											]
-										}
-									},
-									"response": []
-								}
-							]
-						}
-					]
-				},
-				{
-					"name": "device",
-					"item": [
-						{
-							"name": "senders",
+							"name": "user",
 							"item": [
 								{
 									"name": "sms",
 									"item": [
 										{
-											"name": "/register",
+											"name": "/send",
 											"request": {
 												"auth": {
 													"type": "bearer",
 													"bearer": [
 														{
 															"key": "token",
-															"value": "{{device_token}}",
+															"value": "{{admon_token}}",
 															"type": "string"
 														}
 													]
@@ -375,7 +280,7 @@
 												"header": [],
 												"body": {
 													"mode": "raw",
-													"raw": "{\n    \"appVersionCode\": \"M135MUBS6DXE2\",\n    \"appVersionName\": \"14\",\n    \"board\": \"exynos850\",\n    \"brand\": \"samsung\",\n    \"carrierIdFromSimMccMnc\": 2469,\n    \"fingerPrint\": \"samsung/m13ub/m13:14/UP1A.231005.007/M135MUBS6DXE2:user/release-keys\",\n    \"host\": \"SWDK6220\",\n    \"id\": \"UP1A.231005.007\",\n    \"manufacturer\": \"samsung\",\n    \"model\": \"SM-M135M\",\n    \"sdk\": 34,\n    \"simCarrierId\": 2476,\n    \"simCarrierIdName\": \"WALMART\",\n    \"simCountryIso\": \"MX\",\n    \"simOperator\": \"334140\",\n    \"simOperatorName\": \"BAIT\",\n    \"simSpecificCarrierIdName\": \"WALMART\",\n    \"simState\": 5,\n    \"type\": \"user\",\n    \"userName\": \"dpi\"\n}",
+													"raw": "{\n    \"countryCode\": \"MX\",\n    \"number\": \"3461072766\",\n    \"message\": \"Helo API SMS\"\n}",
 													"options": {
 														"raw": {
 															"language": "json"
@@ -383,72 +288,45 @@
 													}
 												},
 												"url": {
-													"raw": "{{protocol}}://{{host}}/apis/device/senders/sms/register",
+													"raw": "{{protocol}}://{{host}}/apis/v1/user/sms/send",
 													"protocol": "{{protocol}}",
 													"host": [
 														"{{host}}"
 													],
 													"path": [
 														"apis",
-														"device",
-														"senders",
+														"v1",
+														"user",
 														"sms",
-														"register"
+														"send"
 													]
 												}
 											},
 											"response": []
-										},
+										}
+									]
+								},
+								{
+									"name": "admon",
+									"item": [
 										{
-											"name": "/online",
+											"name": "/devices",
 											"request": {
 												"auth": {
 													"type": "bearer",
 													"bearer": [
 														{
 															"key": "token",
-															"value": "{{device_token}}",
+															"value": "{{admon_token}}",
 															"type": "string"
 														}
 													]
 												},
-												"method": "POST",
-												"header": [],
-												"url": {
-													"raw": "{{protocol}}://{{host}}/apis/device/senders/sms/online",
-													"protocol": "{{protocol}}",
-													"host": [
-														"{{host}}"
-													],
-													"path": [
-														"apis",
-														"device",
-														"senders",
-														"sms",
-														"online"
-													]
-												}
-											},
-											"response": []
-										},
-										{
-											"name": "/offline",
-											"request": {
-												"auth": {
-													"type": "bearer",
-													"bearer": [
-														{
-															"key": "token",
-															"value": "{{device_token}}",
-															"type": "string"
-														}
-													]
-												},
-												"method": "POST",
+												"method": "PUT",
 												"header": [],
 												"body": {
 													"mode": "raw",
-													"raw": "",
+													"raw": "{\n    \"userName\": \"{{deviceUserName}}\",\n    \"password\": \"{{devicePassword}}\"\n}",
 													"options": {
 														"raw": {
 															"language": "json"
@@ -456,144 +334,273 @@
 													}
 												},
 												"url": {
-													"raw": "{{protocol}}://{{host}}/apis/device/senders/sms/offline",
+													"raw": "{{protocol}}://{{host}}/apis/v1/user/admon/devices",
 													"protocol": "{{protocol}}",
 													"host": [
 														"{{host}}"
 													],
 													"path": [
 														"apis",
-														"device",
-														"senders",
-														"sms",
-														"offline"
+														"v1",
+														"user",
+														"admon",
+														"devices"
 													]
 												}
 											},
 											"response": []
-										},
+										}
+									]
+								}
+							]
+						},
+						{
+							"name": "device",
+							"item": [
+								{
+									"name": "senders",
+									"item": [
 										{
-											"name": "/issue",
-											"request": {
-												"auth": {
-													"type": "bearer",
-													"bearer": [
-														{
-															"key": "token",
-															"value": "{{device_token}}",
-															"type": "string"
+											"name": "sms",
+											"item": [
+												{
+													"name": "/register",
+													"request": {
+														"auth": {
+															"type": "bearer",
+															"bearer": [
+																{
+																	"key": "token",
+																	"value": "{{device_token}}",
+																	"type": "string"
+																}
+															]
+														},
+														"method": "PUT",
+														"header": [],
+														"body": {
+															"mode": "raw",
+															"raw": "{\n    \"appVersionCode\": \"M135MUBS6DXE2\",\n    \"appVersionName\": \"14\",\n    \"board\": \"exynos850\",\n    \"brand\": \"samsung\",\n    \"carrierIdFromSimMccMnc\": 2469,\n    \"fingerPrint\": \"samsung/m13ub/m13:14/UP1A.231005.007/M135MUBS6DXE2:user/release-keys\",\n    \"host\": \"SWDK6220\",\n    \"id\": \"UP1A.231005.007\",\n    \"manufacturer\": \"samsung\",\n    \"model\": \"SM-M135M\",\n    \"sdk\": 34,\n    \"simCarrierId\": 2476,\n    \"simCarrierIdName\": \"WALMART\",\n    \"simCountryIso\": \"MX\",\n    \"simOperator\": \"334140\",\n    \"simOperatorName\": \"BAIT\",\n    \"simSpecificCarrierIdName\": \"WALMART\",\n    \"simState\": 5,\n    \"type\": \"user\",\n    \"userName\": \"dpi\"\n}",
+															"options": {
+																"raw": {
+																	"language": "json"
+																}
+															}
+														},
+														"url": {
+															"raw": "{{protocol}}://{{host}}/apis/device/senders/sms/register",
+															"protocol": "{{protocol}}",
+															"host": [
+																"{{host}}"
+															],
+															"path": [
+																"apis",
+																"device",
+																"senders",
+																"sms",
+																"register"
+															]
 														}
-													]
+													},
+													"response": []
 												},
-												"method": "POST",
-												"header": [],
-												"body": {
-													"mode": "raw",
-													"raw": "{\n    \"code\": 404,\n    \"path\": \"/sms/path\"\n}",
-													"options": {
-														"raw": {
-															"language": "json"
+												{
+													"name": "/online",
+													"request": {
+														"auth": {
+															"type": "bearer",
+															"bearer": [
+																{
+																	"key": "token",
+																	"value": "{{device_token}}",
+																	"type": "string"
+																}
+															]
+														},
+														"method": "POST",
+														"header": [],
+														"url": {
+															"raw": "{{protocol}}://{{host}}/apis/device/senders/sms/online",
+															"protocol": "{{protocol}}",
+															"host": [
+																"{{host}}"
+															],
+															"path": [
+																"apis",
+																"device",
+																"senders",
+																"sms",
+																"online"
+															]
 														}
-													}
+													},
+													"response": []
 												},
-												"url": {
-													"raw": "{{protocol}}://{{host}}/apis/device/senders/sms/issue",
-													"protocol": "{{protocol}}",
-													"host": [
-														"{{host}}"
-													],
-													"path": [
-														"apis",
-														"device",
-														"senders",
-														"sms",
-														"issue"
-													]
+												{
+													"name": "/offline",
+													"request": {
+														"auth": {
+															"type": "bearer",
+															"bearer": [
+																{
+																	"key": "token",
+																	"value": "{{device_token}}",
+																	"type": "string"
+																}
+															]
+														},
+														"method": "POST",
+														"header": [],
+														"body": {
+															"mode": "raw",
+															"raw": "",
+															"options": {
+																"raw": {
+																	"language": "json"
+																}
+															}
+														},
+														"url": {
+															"raw": "{{protocol}}://{{host}}/apis/device/senders/sms/offline",
+															"protocol": "{{protocol}}",
+															"host": [
+																"{{host}}"
+															],
+															"path": [
+																"apis",
+																"device",
+																"senders",
+																"sms",
+																"offline"
+															]
+														}
+													},
+													"response": []
+												},
+												{
+													"name": "/issue",
+													"request": {
+														"auth": {
+															"type": "bearer",
+															"bearer": [
+																{
+																	"key": "token",
+																	"value": "{{device_token}}",
+																	"type": "string"
+																}
+															]
+														},
+														"method": "POST",
+														"header": [],
+														"body": {
+															"mode": "raw",
+															"raw": "{\n    \"code\": 404,\n    \"path\": \"/sms/path\"\n}",
+															"options": {
+																"raw": {
+																	"language": "json"
+																}
+															}
+														},
+														"url": {
+															"raw": "{{protocol}}://{{host}}/apis/device/senders/sms/issue",
+															"protocol": "{{protocol}}",
+															"host": [
+																"{{host}}"
+															],
+															"path": [
+																"apis",
+																"device",
+																"senders",
+																"sms",
+																"issue"
+															]
+														}
+													},
+													"response": []
+												},
+												{
+													"name": "/update",
+													"request": {
+														"auth": {
+															"type": "bearer",
+															"bearer": [
+																{
+																	"key": "token",
+																	"value": "{{device_token}}",
+																	"type": "string"
+																}
+															]
+														},
+														"method": "POST",
+														"header": [],
+														"body": {
+															"mode": "raw",
+															"raw": "{\n    \"smsId\": \"51e1feff-067e-4387-8a37-fafd38c0268e\",\n    \"smsLocalId\": \"fb9c2227-b3c1-4fcf-9ee6-fc7b37f152c3\",\n    \"partNumber\": 1,\n    \"totalParts\": 2,\n    \"status\": \"DELIVERED\"\n}",
+															"options": {
+																"raw": {
+																	"language": "json"
+																}
+															}
+														},
+														"url": {
+															"raw": "{{protocol}}://{{host}}/apis/device/senders/sms/update",
+															"protocol": "{{protocol}}",
+															"host": [
+																"{{host}}"
+															],
+															"path": [
+																"apis",
+																"device",
+																"senders",
+																"sms",
+																"update"
+															]
+														}
+													},
+													"response": []
+												},
+												{
+													"name": "/pending",
+													"request": {
+														"auth": {
+															"type": "bearer",
+															"bearer": [
+																{
+																	"key": "token",
+																	"value": "{{device_token}}",
+																	"type": "string"
+																}
+															]
+														},
+														"method": "POST",
+														"header": [],
+														"body": {
+															"mode": "raw",
+															"raw": "{\n    \"apiSMSIdsPending\": [\n        \"40860a22-66c5-4aef-b74c-f1226f46a325\",\n        \"69df732f-5b66-486a-920b-b5bb308745c6\",\n        \"e514cf6e-4278-4261-8e3d-1bcac5e4a06f\"\n    ]\n}",
+															"options": {
+																"raw": {
+																	"language": "json"
+																}
+															}
+														},
+														"url": {
+															"raw": "{{protocol}}://{{host}}/apis/device/senders/sms/pending",
+															"protocol": "{{protocol}}",
+															"host": [
+																"{{host}}"
+															],
+															"path": [
+																"apis",
+																"device",
+																"senders",
+																"sms",
+																"pending"
+															]
+														}
+													},
+													"response": []
 												}
-											},
-											"response": []
-										},
-										{
-											"name": "/update",
-											"request": {
-												"auth": {
-													"type": "bearer",
-													"bearer": [
-														{
-															"key": "token",
-															"value": "{{device_token}}",
-															"type": "string"
-														}
-													]
-												},
-												"method": "POST",
-												"header": [],
-												"body": {
-													"mode": "raw",
-													"raw": "{\n    \"smsId\": \"51e1feff-067e-4387-8a37-fafd38c0268e\",\n    \"smsLocalId\": \"fb9c2227-b3c1-4fcf-9ee6-fc7b37f152c3\",\n    \"partNumber\": 1,\n    \"totalParts\": 2,\n    \"status\": \"DELIVERED\"\n}",
-													"options": {
-														"raw": {
-															"language": "json"
-														}
-													}
-												},
-												"url": {
-													"raw": "{{protocol}}://{{host}}/apis/device/senders/sms/update",
-													"protocol": "{{protocol}}",
-													"host": [
-														"{{host}}"
-													],
-													"path": [
-														"apis",
-														"device",
-														"senders",
-														"sms",
-														"update"
-													]
-												}
-											},
-											"response": []
-										},
-										{
-											"name": "/pending",
-											"request": {
-												"auth": {
-													"type": "bearer",
-													"bearer": [
-														{
-															"key": "token",
-															"value": "{{device_token}}",
-															"type": "string"
-														}
-													]
-												},
-												"method": "POST",
-												"header": [],
-												"body": {
-													"mode": "raw",
-													"raw": "{\n    \"apiSMSIdsPending\": [\n        \"40860a22-66c5-4aef-b74c-f1226f46a325\",\n        \"69df732f-5b66-486a-920b-b5bb308745c6\",\n        \"e514cf6e-4278-4261-8e3d-1bcac5e4a06f\"\n    ]\n}",
-													"options": {
-														"raw": {
-															"language": "json"
-														}
-													}
-												},
-												"url": {
-													"raw": "{{protocol}}://{{host}}/apis/device/senders/sms/pending",
-													"protocol": "{{protocol}}",
-													"host": [
-														"{{host}}"
-													],
-													"path": [
-														"apis",
-														"device",
-														"senders",
-														"sms",
-														"pending"
-													]
-												}
-											},
-											"response": []
+											]
 										}
 									]
 								}
