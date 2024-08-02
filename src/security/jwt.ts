@@ -8,6 +8,9 @@ export interface RefreshToken {
   parentToken: string;
 }
 
+export const JWTTokenLifeTimeMillis = 3600000;
+export const JWTRefreshTokenExtraLifeTimeMillis = 300000;
+
 export default class JWT {
   constructor(private config = Config.getInstance()) {}
 
@@ -16,13 +19,21 @@ export default class JWT {
     expireAt: number
   ): string {
     if (this.config.getEnv() == EnvTypes.PROD) {
-      return jwt.sign({ data: who, exp: expireAt }, this.config.getKey(), {
-        algorithm: "ES256",
-      });
+      return jwt.sign(
+        { data: who, exp: Math.floor(expireAt / 1000) },
+        this.config.getKey(),
+        {
+          algorithm: "ES256",
+        }
+      );
     }
-    return jwt.sign({ data: who, exp: expireAt }, this.config.getJWTSecret(), {
-      algorithm: "HS256",
-    });
+    return jwt.sign(
+      { data: who, exp: Math.floor(expireAt / 1000) },
+      this.config.getJWTSecret(),
+      {
+        algorithm: "HS256",
+      }
+    );
   }
 
   private verifyToken(token: string): any {
@@ -35,19 +46,26 @@ export default class JWT {
   }
 
   sing(who: Users | Devices): Promise<Connection> {
-    const expireAt = Math.floor(Date.now() / 1000) + 3600;
+    const createdAt = Date.now();
+    const tokenExpireAt = createdAt + JWTTokenLifeTimeMillis;
+    const refreshTokenExpireAt =
+      tokenExpireAt + JWTRefreshTokenExtraLifeTimeMillis;
     return new Promise(async (res, rej) => {
       try {
-        const token = this.getToken(who, expireAt);
+        const token = this.getToken(who, tokenExpireAt);
         const refreshToken = this.getToken(
           { parentToken: token },
-          expireAt + 300
+          refreshTokenExpireAt
         );
         const conn = await Connection.create({
           token,
+          tokenLifeTime: JWTTokenLifeTimeMillis,
+          tokenExpireAt,
           refreshToken,
+          refreshTokenExtraLifeTime: JWTRefreshTokenExtraLifeTimeMillis,
+          refreshTokenExpireAt,
           agentId: who.getAgentId(),
-          expireAt,
+          createdAt: createdAt,
         });
         res(conn);
       } catch (e) {

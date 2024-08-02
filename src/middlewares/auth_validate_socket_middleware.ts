@@ -20,7 +20,10 @@ const authValidateSocketMiddleware: (
   }
 
   try {
-    const agent = jwt.verify(splitedToke[1]);
+    let agent = jwt.verify(splitedToke[1]);
+    if (jwt.isRefreshToken(agent)) {
+      agent = jwt.decode(agent.parentToken);
+    }
     if (jwt.isDevice(agent)) {
       next();
       return;

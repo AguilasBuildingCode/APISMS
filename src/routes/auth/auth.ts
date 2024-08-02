@@ -5,6 +5,7 @@ import authValidateMiddleware from "../../middlewares/auth_validate_middleware";
 import Users from "../../db/models/users_model";
 import Devices from "../../db/models/devices_model";
 import PsswdEncrypt from "../../security/passwd_encrypt";
+import { Op } from "sequelize";
 
 const jwt = new JWT();
 const auth = express.Router();
@@ -19,19 +20,18 @@ const authMiddleware: RequestHandler<any> = async (req, res, next) => {
   ) {
     try {
       const currentConn = await Connection.findOne({
-        attributes: ["token", "expireAt"],
         where: {
           agentId,
           deleted: false,
         },
-        order: [["expireAt", "DESC"]],
+        order: [["tokenExpireAt", "DESC"]],
       });
 
       if (currentConn && jwt.verify(currentConn.getDataValue("token"))) {
-        const expireAt = currentConn.getDataValue("expireAt");
-        res
-          .status(401)
-          .json({ detail: "Your last connection already is valid", expireAt });
+        res.status(401).json({
+          detail: "Your last connection already is valid",
+          ...currentConn.asConnInfo(),
+        });
         return;
       }
       next();
@@ -50,18 +50,18 @@ auth.post("/login", async (req, res) => {
   try {
     try {
       if (parentToken && currentConn && jwt.verify(parentToken)) {
-        const expireAt = currentConn.getDataValue("expireAt");
-        res
-          .status(401)
-          .json({ detail: "Your last connection already is valid", expireAt });
+        res.status(401).json({
+          detail: "Your last connection already is valid",
+          ...currentConn,
+        });
         return;
       }
 
       if (!parentToken && token && currentConn && jwt.verify(token)) {
-        const expireAt = currentConn.getDataValue("expireAt");
-        res
-          .status(401)
-          .json({ detail: "Your last connection already is valid", expireAt });
+        res.status(401).json({
+          detail: "Your last connection already is valid",
+          ...currentConn,
+        });
         return;
       }
     } catch (e) {
@@ -111,8 +111,9 @@ auth.post("/login", async (req, res) => {
   }
 });
 
-auth.post("/valid", async (_, res) => {
-  res.status(200).send({});
+auth.post("/valid", async (req, res) => {
+  const { currentConn } = req.body;
+  res.status(200).send({ ...currentConn });
 });
 
 auth.post("/logout", async (req, res) => {
@@ -125,7 +126,7 @@ auth.post("/logout", async (req, res) => {
       },
       {
         where: {
-          token,
+          [Op.or]: [{ token }, { refreshToken: token }],
         },
       }
     );

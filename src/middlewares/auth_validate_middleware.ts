@@ -19,7 +19,6 @@ const authValidateMiddleware: RequestHandler<any> = async (req, res, next) => {
 
   try {
     const currentConn = await Connection.findOne({
-      attributes: ["expireAt"],
       where: {
         [Op.or]: [{ token: splitedToke[1] }, { refreshToken: splitedToke[1] }],
         deleted: false,
@@ -44,7 +43,7 @@ const authValidateMiddleware: RequestHandler<any> = async (req, res, next) => {
       ...agent,
       ...parentAgent,
       token: splitedToke[1],
-      currentConn,
+      currentConn: currentConn.asConnInfo(),
       ...req.body,
     };
     next();
