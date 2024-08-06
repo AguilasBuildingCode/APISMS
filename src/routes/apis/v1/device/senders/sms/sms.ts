@@ -88,10 +88,10 @@ sms.put("/register", async (req, res) => {
       simState: Encrypt.encrypt(simState),
       simOperator: Encrypt.encrypt(simOperator),
       simCountryIso,
-      simOperatorName: Encrypt.encrypt(simOperatorName),
+      simOperatorName,
       simSpecificCarrierIdName: Encrypt.encrypt(simSpecificCarrierIdName),
-    })
-    res.status(200).json({ });
+    });
+    res.status(200).json({});
     return;
   }
 
@@ -116,7 +116,7 @@ sms.put("/register", async (req, res) => {
       simState: Encrypt.encrypt(simState),
       simOperator: Encrypt.encrypt(simOperator),
       simCountryIso,
-      simOperatorName: Encrypt.encrypt(simOperatorName),
+      simOperatorName,
       simSpecificCarrierIdName: Encrypt.encrypt(simSpecificCarrierIdName),
     }),
     await SMSendersWork.create({ deviceId: agentId, userId }),
@@ -183,14 +183,8 @@ sms.post("/pending", async (req, res) => {
 });
 
 sms.post("/update", async (req, res) => {
-  const {
-    agentId,
-    smsId,
-    smsLocalId,
-    partNumber,
-    totalParts,
-    status,
-  } = req.body;
+  const { agentId, smsId, smsLocalId, partNumber, totalParts, status } =
+    req.body;
   if (
     typeof smsId != "string" &&
     typeof smsLocalId != "string" &&
