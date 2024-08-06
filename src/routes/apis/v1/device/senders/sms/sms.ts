@@ -8,6 +8,7 @@ import SMStatus from "../../../../../../db/models/sms_status_model";
 import { SendersSMStatus } from "../../../../../../enums/senders_sms_status";
 import Encrypt from "../../../../../../security/encrypt";
 import Devices from "../../../../../../db/models/devices_model";
+import SMS from "../../../../../../db/models/sms_model";
 
 const sms = express.Router();
 const smsPath = "/sms";
@@ -153,31 +154,45 @@ sms.post("/online", async (req, res) => {
 });
 
 sms.post("/pending", async (req, res) => {
-  const { apiSMSIdsPending } = req.body;
-  if (!(apiSMSIdsPending instanceof Array) || apiSMSIdsPending.length == 0) {
+  console.log(JSON.stringify({ body: req.body }));
+  const { agentId, smsIds } = req.body;
+  if (!(smsIds instanceof Array) || smsIds.length == 0) {
     res.status(400).json({ detail: "Missing o invalid apiSMSIdsPending" });
     return;
   }
 
   try {
-    const smsPendings = (
-      await SMStatus.findAll({
-        attributes: ["smsId"],
-        group: ["smsId"],
-        where: {
-          smsId: {
-            [Op.in]: apiSMSIdsPending,
-          },
+    const sms = await SMS.findAll({
+      attributes: ["id", "countryCode", "number", "message"],
+      include: [
+        {
+          attributes: [],
+          model: SMStatus,
+          required: false,
         },
-      })
-    ).map((smsPendings) => smsPendings.getDataValue("smsId"));
-    res.status(200).json({
-      apiSMSIdsPending: apiSMSIdsPending.filter(
-        (smsId) => !smsPendings.includes(smsId)
-      ),
+      ],
+      where: {
+        id: {
+          [Op.in]: smsIds,
+        },
+        "$sms_statuses.smsId$": null,
+        deviceId: agentId,
+      },
+      subQuery: false,
     });
+
+    res.status(200).json(
+      sms
+        .map((_sms) => {
+          return {
+            smsId: _sms.getDataValue("id"),
+            countryCode: _sms.getDataValue("countryCode"),
+            number: Encrypt.decrypt(_sms.getDataValue("number")),
+            message: Encrypt.decrypt(_sms.getDataValue("message")),
+          };
+        })
+    );
   } catch (e: any) {
-    console.error(e);
     res.status(500).json({ detail: e.message });
   }
 });
