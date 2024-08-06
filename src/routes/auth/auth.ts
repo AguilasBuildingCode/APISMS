@@ -112,7 +112,17 @@ auth.post("/login", async (req, res) => {
 });
 
 auth.post("/valid", async (req, res) => {
-  const { currentConn } = req.body;
+  const { parentToken, currentConn } = req.body;
+  if (parentToken && parentToken != "") {
+    try {
+      jwt.verify(parentToken);
+      res.status(200).send({ ...currentConn });
+    } catch (e) {
+      console.error(e);
+      res.status(401).json({ detail: "Invalid token" });
+    }
+    return;
+  }
   res.status(200).send({ ...currentConn });
 });
 

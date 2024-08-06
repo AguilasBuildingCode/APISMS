@@ -1,5 +1,5 @@
 import { RequestHandler } from "express";
-import JWT from "../security/jwt";
+import JWT, { AgentToken } from "../security/jwt";
 import Connection from "../db/models/connection_model";
 import { Op } from "sequelize";
 
@@ -31,7 +31,7 @@ const authValidateMiddleware: RequestHandler<any> = async (req, res, next) => {
     }
 
     const agent = jwt.verify(splitedToke[1]);
-    let parentAgent: any = null;
+    let parentAgent: AgentToken | undefined = undefined;
     if (jwt.isRefreshToken(agent)) {
       parentAgent = jwt.decode(agent.parentToken);
     }
@@ -39,7 +39,7 @@ const authValidateMiddleware: RequestHandler<any> = async (req, res, next) => {
     req.body = {
       agentId:
         (agent as any).id ||
-        parentAgent.id,
+        (parentAgent as any).id,
       ...agent,
       ...parentAgent,
       token: splitedToke[1],

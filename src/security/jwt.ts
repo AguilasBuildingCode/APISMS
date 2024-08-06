@@ -11,11 +11,13 @@ export interface RefreshToken {
 export const JWTTokenLifeTimeMillis = 3600000;
 export const JWTRefreshTokenExtraLifeTimeMillis = 300000;
 
+export type AgentToken = Users | Devices | RefreshToken
+
 export default class JWT {
   constructor(private config = Config.getInstance()) {}
 
   private getToken(
-    who: Users | Devices | RefreshToken,
+    who: AgentToken,
     expireAt: number
   ): string {
     if (this.config.getEnv() == EnvTypes.PROD) {
@@ -74,7 +76,7 @@ export default class JWT {
     });
   }
 
-  verify(token: string): Users | Devices | RefreshToken {
+  verify(token: string): AgentToken {
     const agent = this.verifyToken(token);
 
     if (typeof agent == "string") {
@@ -87,7 +89,7 @@ export default class JWT {
     throw new Error("Invalid token");
   }
 
-  decode(token: string): Users | Devices | RefreshToken {
+  decode(token: string): AgentToken {
     const agent = jwt.decode(token);
     if (typeof agent == "string") {
       throw new Error("Invalid token");
