@@ -7,7 +7,10 @@ const authValidateSocketMiddleware: (
   socket: Socket,
   next: (err?: ExtendedError | undefined) => void
 ) => void = (socket, next) => {
-  const token = socket.handshake.auth["Authorization"];
+  const token =
+    socket.handshake.headers["Authorization"] ??
+    socket.handshake.headers["authorization"] ??
+    socket.handshake.auth["Authorization"];
   if (typeof token != "string" || !token.startsWith("Bearer")) {
     next(new Error("Bad request"));
     return;
