@@ -16,11 +16,9 @@ admon.put("/devices", async (req, res) => {
     typeof password != "string" ||
     password.length < 8
   ) {
-    res
-      .status(400)
-      .json({
-        detail: "Missing or invalid userName and/or password",
-      });
+    res.status(400).json({
+      detail: "Missing or invalid userName and/or password",
+    });
     return;
   }
 
@@ -52,11 +50,9 @@ admon.put("/devices", async (req, res) => {
       deviceId,
       userName
     );
-    await QRcode.toFile(
-      qrPath,
-      JSON.stringify({ ...device.asUserInfo(), userName, password }),
-      { type: "png" }
-    );
+    await QRcode.toFile(qrPath, JSON.stringify(device.asCredentials()), {
+      type: "png",
+    });
     res.status(201).sendFile(qrPath);
   } catch (e: any) {
     console.error(e);

@@ -388,13 +388,14 @@
 															}
 														},
 														"url": {
-															"raw": "{{protocol}}://{{host}}/apis/device/senders/sms/register",
+															"raw": "{{protocol}}://{{host}}/apis/v1/device/senders/sms/register",
 															"protocol": "{{protocol}}",
 															"host": [
 																"{{host}}"
 															],
 															"path": [
 																"apis",
+																"v1",
 																"device",
 																"senders",
 																"sms",
@@ -420,13 +421,14 @@
 														"method": "POST",
 														"header": [],
 														"url": {
-															"raw": "{{protocol}}://{{host}}/apis/device/senders/sms/online",
+															"raw": "{{protocol}}://{{host}}/apis/v1/device/senders/sms/online",
 															"protocol": "{{protocol}}",
 															"host": [
 																"{{host}}"
 															],
 															"path": [
 																"apis",
+																"v1",
 																"device",
 																"senders",
 																"sms",
@@ -461,13 +463,14 @@
 															}
 														},
 														"url": {
-															"raw": "{{protocol}}://{{host}}/apis/device/senders/sms/offline",
+															"raw": "{{protocol}}://{{host}}/apis/v1/device/senders/sms/offline",
 															"protocol": "{{protocol}}",
 															"host": [
 																"{{host}}"
 															],
 															"path": [
 																"apis",
+																"v1",
 																"device",
 																"senders",
 																"sms",
@@ -502,13 +505,14 @@
 															}
 														},
 														"url": {
-															"raw": "{{protocol}}://{{host}}/apis/device/senders/sms/issue",
+															"raw": "{{protocol}}://{{host}}/apis/v1/device/senders/sms/issue",
 															"protocol": "{{protocol}}",
 															"host": [
 																"{{host}}"
 															],
 															"path": [
 																"apis",
+																"v1",
 																"device",
 																"senders",
 																"sms",
@@ -535,7 +539,7 @@
 														"header": [],
 														"body": {
 															"mode": "raw",
-															"raw": "{\n    \"smsId\": \"51e1feff-067e-4387-8a37-fafd38c0268e\",\n    \"smsLocalId\": \"fb9c2227-b3c1-4fcf-9ee6-fc7b37f152c3\",\n    \"partNumber\": 1,\n    \"totalParts\": 2,\n    \"status\": \"DELIVERED\"\n}",
+															"raw": "{\n    \"smsId\": \"20cdf9e0-f4e0-41d3-9207-f8113f0c8e27\",\n    \"smsLocalId\": \"fb9c2227-b3c1-4fcf-9ee6-fc7b37f152c3\",\n    \"partNumber\": 0,\n    \"totalParts\": 0,\n    \"status\": \"SENDED\"\n}",
 															"options": {
 																"raw": {
 																	"language": "json"
@@ -543,13 +547,14 @@
 															}
 														},
 														"url": {
-															"raw": "{{protocol}}://{{host}}/apis/device/senders/sms/update",
+															"raw": "{{protocol}}://{{host}}/apis/v1/device/senders/sms/update",
 															"protocol": "{{protocol}}",
 															"host": [
 																"{{host}}"
 															],
 															"path": [
 																"apis",
+																"v1",
 																"device",
 																"senders",
 																"sms",
@@ -576,7 +581,7 @@
 														"header": [],
 														"body": {
 															"mode": "raw",
-															"raw": "{\n    \"apiSMSIdsPending\": [\n        \"40860a22-66c5-4aef-b74c-f1226f46a325\",\n        \"69df732f-5b66-486a-920b-b5bb308745c6\",\n        \"e514cf6e-4278-4261-8e3d-1bcac5e4a06f\"\n    ]\n}",
+															"raw": "{\n    \"smsIds\": [\n        \"20cdf9e0-f4e0-41d3-9207-f8113f0c8e27\",\n        \"8cc832d2-a8d8-426a-9a52-71933ef60d6f\",\n        \"ba15b0fc-a29f-4c36-bcaf-a0d14668572e\",\n        \"c2c2acd3-c9ee-498a-b5a9-5ba06549a094\"\n    ]\n}",
 															"options": {
 																"raw": {
 																	"language": "json"
@@ -584,13 +589,14 @@
 															}
 														},
 														"url": {
-															"raw": "{{protocol}}://{{host}}/apis/device/senders/sms/pending",
+															"raw": "{{protocol}}://{{host}}/apis/v1/device/senders/sms/pending",
 															"protocol": "{{protocol}}",
 															"host": [
 																"{{host}}"
 															],
 															"path": [
 																"apis",
+																"v1",
 																"device",
 																"senders",
 																"sms",

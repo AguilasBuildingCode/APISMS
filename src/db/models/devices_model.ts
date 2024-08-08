@@ -16,6 +16,13 @@ class Devices extends Model {
       id: this.getDataValue("id"),
     };
   }
+  asCredentials() {
+    return {
+      agentId: this.getAgentId(),
+      userName: this.getDataValue("userName"),
+      password: this.getDataValue("password"),
+    };
+  }
 }
 
 Devices.init(
