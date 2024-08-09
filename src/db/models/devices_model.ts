@@ -20,7 +20,6 @@ class Devices extends Model {
     return {
       agentId: this.getAgentId(),
       userName: this.getDataValue("userName"),
-      password: this.getDataValue("password"),
     };
   }
 }

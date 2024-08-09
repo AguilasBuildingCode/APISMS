@@ -50,9 +50,13 @@ admon.put("/devices", async (req, res) => {
       deviceId,
       userName
     );
-    await QRcode.toFile(qrPath, JSON.stringify(device.asCredentials()), {
-      type: "png",
-    });
+    await QRcode.toFile(
+      qrPath,
+      JSON.stringify({ ...device.asCredentials(), password }),
+      {
+        type: "png",
+      }
+    );
     res.status(201).sendFile(qrPath);
   } catch (e: any) {
     console.error(e);

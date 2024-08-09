@@ -85,26 +85,22 @@ auth.post("/login", async (req, res) => {
     }
 
     if (
-      userName != agent.getDataValue("userName") ||
-      (!(await PsswdEncrypt.compare(
-        password,
-        agent.getDataValue("password")
-      )) &&
-        password != agent.getDataValue("password"))
+      userName == agent.getDataValue("userName") &&
+      (await PsswdEncrypt.compare(password, agent.getDataValue("password")))
     ) {
-      const attemptsLogin = Number(agent.getDataValue("attemptsLogin")) + 1;
-      agent.update({
-        attemptsLogin,
-        locked: attemptsLogin >= 3,
-      });
-      res
-        .status(401)
-        .json({ detail: "Invalid agentId and/or userName and/or password" });
+      const conn = await jwt.sing(agent);
+      res.status(200).json(conn.asUserInfo());
       return;
     }
 
-    const conn = await jwt.sing(agent);
-    res.status(200).json(conn.asUserInfo());
+    const attemptsLogin = Number(agent.getDataValue("attemptsLogin")) + 1;
+    agent.update({
+      attemptsLogin,
+      locked: attemptsLogin >= 3,
+    });
+    res
+      .status(401)
+      .json({ detail: "Invalid agentId and/or userName and/or password" });
   } catch (e: any) {
     console.error(e);
     res.status(500).json({ detail: e.message });
