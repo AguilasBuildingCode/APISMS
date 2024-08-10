@@ -88,7 +88,7 @@ auth.post("/login", async (req, res) => {
       userName == agent.getDataValue("userName") &&
       (await PsswdEncrypt.compare(password, agent.getDataValue("password")))
     ) {
-      const conn = await jwt.sing(agent);
+      const conn = await jwt.sing(agent, password);
       res.status(200).json(conn.asUserInfo());
       return;
     }

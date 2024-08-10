@@ -22,6 +22,16 @@ class Devices extends Model {
       userName: this.getDataValue("userName"),
     };
   }
+  asTokenData(realPassword: string) {
+    return {
+      id: this.getDataValue("id"),
+      userId: this.getDataValue("userId"),
+      userName: this.getDataValue("userName"),
+      password: realPassword,
+      attemptsLogin: this.getDataValue("attemptsLogin"),
+      locked: this.getDataValue("locked"),
+    };
+  }
 }
 
 Devices.init(

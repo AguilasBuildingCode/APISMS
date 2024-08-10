@@ -11,18 +11,21 @@ export interface RefreshToken {
 export const JWTTokenLifeTimeMillis = 3600000;
 export const JWTRefreshTokenExtraLifeTimeMillis = 300000;
 
-export type AgentToken = Users | Devices | RefreshToken
+export type AgentToken = Users | Devices | RefreshToken;
 
 export default class JWT {
   constructor(private config = Config.getInstance()) {}
 
   private getToken(
-    who: AgentToken,
+    who: any,
     expireAt: number
   ): string {
     if (this.config.getEnv() == EnvTypes.PROD) {
       return jwt.sign(
-        { data: who, exp: Math.floor(expireAt / 1000) },
+        {
+          data: who,
+          exp: Math.floor(expireAt / 1000),
+        },
         this.config.getKey(),
         {
           algorithm: "ES256",
@@ -47,14 +50,14 @@ export default class JWT {
     });
   }
 
-  sing(who: Users | Devices): Promise<Connection> {
+  sing(who: Users | Devices, password: string): Promise<Connection> {
     const createdAt = Date.now();
     const tokenExpireAt = createdAt + JWTTokenLifeTimeMillis;
     const refreshTokenExpireAt =
       tokenExpireAt + JWTRefreshTokenExtraLifeTimeMillis;
     return new Promise(async (res, rej) => {
       try {
-        const token = this.getToken(who, tokenExpireAt);
+        const token = this.getToken(who.asTokenData(password), tokenExpireAt);
         const refreshToken = this.getToken(
           { parentToken: token },
           refreshTokenExpireAt

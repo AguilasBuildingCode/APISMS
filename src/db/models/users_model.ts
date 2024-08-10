@@ -12,6 +12,17 @@ class Users extends Model {
   getAgentId() {
     return this.getDataValue("id");
   }
+  asTokenData(realPassword: string) {
+    return {
+      id: this.getDataValue("id"),
+      businessName: this.getDataValue("businessName"),
+      userName: this.getDataValue("userName"),
+      password: realPassword,
+      type: this.getDataValue("type"),
+      attemptsLogin: this.getDataValue("attemptsLogin"),
+      locked: this.getDataValue("locked"),
+    };
+  }
 }
 
 Users.init(
