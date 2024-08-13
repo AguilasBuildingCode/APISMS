@@ -1,0 +1,59 @@
+import { DataTypes, Model } from "sequelize";
+import { smsSequelize } from "../sequelize";
+import Devices from "./devices_model";
+
+class Issues extends Model {
+  asUserInfo() {
+    return {
+      id: this.getDataValue("id"),
+    };
+  }
+}
+
+Issues.init(
+  {
+    id: {
+      type: DataTypes.UUID,
+      primaryKey: true,
+      allowNull: false,
+      validate: {
+        isUUID: 4,
+      },
+    },
+    deviceId: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      validate: {
+        isUUID: 4,
+      },
+    },
+    code: {
+      type: DataTypes.SMALLINT,
+      allowNull: false,
+    },
+    message: {
+      type: DataTypes.STRING,
+    },
+    detail: {
+      type: DataTypes.STRING,
+    },
+    path: {
+      type: DataTypes.STRING,
+    },
+    isBodyEmpty: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+  },
+  {
+    sequelize: smsSequelize,
+    modelName: "issue",
+  }
+);
+
+(async () => {
+  await Issues.sync();
+  Issues.belongsTo(Devices);
+})();
+
+export default Issues;

@@ -1,0 +1,44 @@
+{
+  "name": "toolserv",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "tsw": "tsc -w",
+    "nodemon": "nodemon dist/index.js",
+    "dev": "concurrently \"tsc -w\" \"nodemon dist/index.js\"",
+    "run": "nodemon dist/index.js",
+    "setup": "python3 ./setup.py",
+    "start": "node dist/index.js"
+  },
+  "author": "ANPA",
+  "license": "ISC",
+  "dependencies": {
+    "@types/dotenv": "^8.2.0",
+    "@types/express": "^4.17.11",
+    "bcrypt": "^5.1.1",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "helmet": "^4.4.1",
+    "https": "^1.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.0",
+    "node-cron": "^3.0.3",
+    "qrcode": "^1.5.3",
+    "sequelize": "^6.37.3",
+    "socket.io": "^4.7.5",
+    "sqlite3": "^5.1.7",
+    "uuid": "^8.3.2"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^3.0.1",
+    "@types/jsonwebtoken": "^8.5.1",
+    "@types/morgan": "^1.9.2",
+    "@types/node-cron": "^3.0.11",
+    "@types/qrcode": "^1.5.5",
+    "@types/uuid": "^8.3.0",
+    "concurrently": "^6.0.0",
+    "nodemon": "^2.0.7",
+    "socket.io-client": "^4.7.5"
+  }
+}
