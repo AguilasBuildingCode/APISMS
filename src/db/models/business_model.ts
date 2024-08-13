@@ -1,7 +1,7 @@
 import { DataTypes, Model } from "sequelize";
 import { smsSequelize } from "../sequelize";
-import Encrypt from "../../security/encrypt";
 import Users from "./users_model";
+import Encrypt from "../../security/encrypt";
 
 class Business extends Model {}
 
@@ -34,7 +34,7 @@ Business.init(
   Business.hasOne(Users, {
     onDelete: "CASCADE",
     onUpdate: "CASCADE",
-  })
+  });
   try {
     await Business.findOrCreate({
       where: { name: process.env.BUSSINES_NAME },

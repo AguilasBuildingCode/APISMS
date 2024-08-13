@@ -23,6 +23,8 @@ export default class Config {
   private dotenvConfigOutput?: DotenvConfigOutput;
   private envType?: EnvTypes;
   private jwtSecret?: string;
+  private aesSecret?: string;
+  private ppkSecret?: string;
 
   private key?: string;
   private cert?: string;
@@ -77,6 +79,8 @@ export default class Config {
     this.portAPIHTTP = Number(process.env.PORT_API_HTTP);
     this.portAPIHTTPS = Number(process.env.PORT_API_HTTPS);
     this.jwtSecret = process.env.JWT_SECRET
+    this.aesSecret = process.env.AES_SECRET
+    this.ppkSecret = process.env.PPK_SECRET
     return this;
   }
 
@@ -116,6 +120,20 @@ export default class Config {
       return this.jwtSecret
     }
     throw new Error("JWT_SECRET not found in env file")
+  }
+
+  getAESSecret(): string {
+    if (this.aesSecret) {
+      return this.aesSecret
+    }
+    throw new Error("AES_SECRET not found in env file")
+  }
+
+  getPPKSecret(): string {
+    if (this.ppkSecret) {
+      return this.ppkSecret
+    }
+    throw new Error("PPK_SECRET not found in env file")
   }
 
   getKey(): string {

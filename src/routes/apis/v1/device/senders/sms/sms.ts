@@ -6,9 +6,9 @@ import SMSendersWork from "../../../../../../db/models/sms_senders_works_model";
 import { Op } from "sequelize";
 import SMStatus from "../../../../../../db/models/sms_status_model";
 import { SendersSMStatus } from "../../../../../../enums/senders_sms_status";
-import Encrypt from "../../../../../../security/encrypt";
 import Devices from "../../../../../../db/models/devices_model";
 import SMS from "../../../../../../db/models/sms_model";
+import Encrypt from "../../../../../../security/encrypt";
 
 const sms = express.Router();
 const smsPath = "/sms";
@@ -182,15 +182,14 @@ sms.post("/pending", async (req, res) => {
     });
 
     res.status(200).json(
-      sms
-        .map((_sms) => {
-          return {
-            smsId: _sms.getDataValue("id"),
-            countryCode: _sms.getDataValue("countryCode"),
-            number: Encrypt.decrypt(_sms.getDataValue("number")),
-            message: Encrypt.decrypt(_sms.getDataValue("message")),
-          };
-        })
+      sms.map((_sms) => {
+        return {
+          smsId: _sms.getDataValue("id"),
+          countryCode: _sms.getDataValue("countryCode"),
+          number: Encrypt.decrypt(_sms.getDataValue("number")),
+          message: Encrypt.decrypt(_sms.getDataValue("message")),
+        };
+      })
     );
   } catch (e: any) {
     res.status(500).json({ detail: e.message });
@@ -237,7 +236,7 @@ sms.post("/update", async (req, res) => {
       smsDelivered: currentWork.getDataValue("smsDelivered"),
       smsFailed: currentWork.getDataValue("smsFailed"),
     };
-    smsPending = smsPending - 1;
+    smsPending = smsPending > 0 ? smsPending - 1 : smsPending;
     switch (status) {
       case "SEND":
         smsSend = smsSend + 1;
@@ -257,6 +256,7 @@ sms.post("/update", async (req, res) => {
       case "FAIL":
         smsFailed = smsFailed + 1;
         currentWork.update({
+          smsPending,
           smsFailed,
           score: (smsDelivered * 100) / smsTotal,
         });
