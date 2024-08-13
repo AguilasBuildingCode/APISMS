@@ -7,6 +7,7 @@ import io from "../../../../..";
 import Devices from "../../../../../db/models/devices_model";
 import { smsSequelize } from "../../../../../db/sequelize";
 import Encrypt from "../../../../../security/encrypt";
+import Utils from "../../../../../utils/utils";
 
 const sms = express.Router();
 const smsPath = "/sms";
@@ -64,13 +65,11 @@ sms.put("/send", async (req, res) => {
       number,
       message,
     });
+
+    const smsParts = Utils.calcSMSParts(message);
     betterSender.update({
-      smsTotal:
-        Number(betterSender.getDataValue("smsTotal")) +
-        Math.ceil(message.length / 153),
-      smsPending:
-        Number(betterSender.getDataValue("smsPending")) +
-        Math.ceil(message.length / 153),
+      smsTotal: Number(betterSender.getDataValue("smsTotal")) + smsParts,
+      smsPending: Number(betterSender.getDataValue("smsPending")) + smsParts,
     });
     res.status(201).json(currentSMS.asUserInfo());
   } catch (e: any) {
