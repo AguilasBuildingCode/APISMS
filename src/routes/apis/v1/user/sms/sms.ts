@@ -20,7 +20,8 @@ sms.put("/send", async (req, res) => {
     typeof number != "string" ||
     number.length != 10 ||
     typeof message != "string" ||
-    message.length == 0
+    message.length == 0 ||
+    message.length > 212
   ) {
     res.status(400).json({
       detail: "Missing or invalid countryCode and/or number and/or message",
