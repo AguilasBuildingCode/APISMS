@@ -7,11 +7,10 @@ export default class PPKEncrypt {
   static encrypt<T extends string | number | bigint | boolean | object>(
     toEncrypt: T
   ): string {
-    var publicKey = config.getCert();
     var buffer = Buffer.from(JSON.stringify(toEncrypt));
     var encrypted = crypto.publicEncrypt(
       {
-        key: publicKey,
+        key: config.getPPKPublic(),
         passphrase: config.getPPKSecret(),
       },
       buffer
@@ -25,7 +24,7 @@ export default class PPKEncrypt {
     var buffer = Buffer.from(CompressData.unzip(toDecrypt), "base64");
     const decrypted = crypto.privateDecrypt(
       {
-        key: config.getKey(),
+        key: config.getPPKPrivate(),
         passphrase: config.getPPKSecret(),
       },
       buffer
