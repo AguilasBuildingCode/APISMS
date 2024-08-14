@@ -264,7 +264,7 @@
 									"name": "sms",
 									"item": [
 										{
-											"name": "/send",
+											"name": "/send - long",
 											"request": {
 												"auth": {
 													"type": "bearer",
@@ -280,7 +280,48 @@
 												"header": [],
 												"body": {
 													"mode": "raw",
-													"raw": "{\n    \"countryCode\": \"MX\",\n    \"number\": \"3461072766\",\n    \"message\": \"Helo API SMS\"\n}",
+													"raw": "{\n    \"countryCode\": \"MX\",\n    \"number\": \"3461072766\",\n    \"message\": \"123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 12\"\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{protocol}}://{{host}}/apis/v1/user/sms/send",
+													"protocol": "{{protocol}}",
+													"host": [
+														"{{host}}"
+													],
+													"path": [
+														"apis",
+														"v1",
+														"user",
+														"sms",
+														"send"
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "/send - short",
+											"request": {
+												"auth": {
+													"type": "bearer",
+													"bearer": [
+														{
+															"key": "token",
+															"value": "{{admon_token}}",
+															"type": "string"
+														}
+													]
+												},
+												"method": "PUT",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n    \"countryCode\": \"MX\",\n    \"number\": \"3461072766\",\n    \"message\": \"Hello SMS API\"\n}",
 													"options": {
 														"raw": {
 															"language": "json"
