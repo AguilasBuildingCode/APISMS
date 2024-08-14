@@ -1,5 +1,6 @@
 import { config, DotenvConfigOutput } from "dotenv";
 import express from "express";
+import crypto from "crypto";
 import path from "path";
 import fs from "fs";
 
@@ -12,6 +13,18 @@ export enum EnvTypes {
 const LOCAL_DIR = path.join(__dirname, `../.${EnvTypes.LOCAL}.env`);
 const BETA_DIR = path.join(__dirname, `../.${EnvTypes.BETA}.env`);
 const PROD_DIR = path.join(__dirname, `../.${EnvTypes.PROD}.env`);
+
+const { publicKey, privateKey } = crypto.generateKeyPairSync("rsa", {
+  modulusLength: 2048,
+  publicKeyEncoding: {
+    type: "pkcs1",
+    format: "pem",
+  },
+  privateKeyEncoding: {
+    type: "pkcs1",
+    format: "pem",
+  },
+});
 
 export default class Config {
   private static config: Config = new Config().initConfig();
@@ -29,6 +42,9 @@ export default class Config {
   private key?: string;
   private cert?: string;
   private ca?: string;
+
+  private ppkPublicKey?: string;
+  private ppkPrivateKey?: string;
 
   static getInstance(): Config {
     return this.config;
@@ -75,6 +91,16 @@ export default class Config {
     this.key = path.join(__dirname, `../cert/${this.envType}_key.pem`);
     this.cert = path.join(__dirname, `../cert/${this.envType}_cert.pem`);
     this.ca = path.join(__dirname, `../cert/${this.envType}_ca.pem`);
+    this.ppkPublicKey = path.join(__dirname, `../cert/${this.envType}_ppk_public.pem`);
+    this.ppkPrivateKey = path.join(__dirname, `../cert/${this.envType}_ppk_private.pem`);
+
+    if (!fs.existsSync(this.ppkPublicKey)) {
+      fs.writeFileSync(this.ppkPublicKey, publicKey)
+    }
+
+    if (!fs.existsSync(this.ppkPrivateKey)) {
+      fs.writeFileSync(this.ppkPrivateKey, privateKey)
+    }
 
     this.portAPIHTTP = Number(process.env.PORT_API_HTTP);
     this.portAPIHTTPS = Number(process.env.PORT_API_HTTPS);
@@ -164,6 +190,26 @@ export default class Config {
       throw new Error(`File ${this.ca} not found`);
     }
     throw new Error("Env ca not found");
+  }
+
+  getPPKPublic(): string {
+    if (this.ppkPublicKey) {
+      if (fs.existsSync(this.ppkPublicKey)) {
+        return fs.readFileSync(this.ppkPublicKey, "utf-8")
+      }
+      throw new Error(`File ${this.ppkPublicKey} not found`);
+    }
+    throw new Error("Env ppkPublicKey not found");
+  }
+
+  getPPKPrivate(): string {
+    if (this.ppkPrivateKey) {
+      if (fs.existsSync(this.ppkPrivateKey)) {
+        return fs.readFileSync(this.ppkPrivateKey, "utf-8")
+      }
+      throw new Error(`File ${this.ppkPrivateKey} not found`);
+    }
+    throw new Error("Env ppkPrivateKey not found");
   }
 
   getEnvStatus(): Promise<any> {
