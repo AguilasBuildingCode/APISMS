@@ -39,7 +39,6 @@ sms.put("/register", async (req, res) => {
     simSpecificCarrierIdName,
   } = req.body;
   if (
-    typeof agentId != "string" ||
     typeof model != "string" ||
     typeof id != "string" ||
     typeof sdk != "number" ||
@@ -60,77 +59,78 @@ sms.put("/register", async (req, res) => {
     return;
   }
 
-  const smsSender = await SMSenderInfo.findOne({
-    attributes: ["deviceId"],
-    where: {
-      deviceId: agentId,
-      model,
-      id,
-    },
-    include: {
-      attributes: [],
-      model: Devices,
+  try {
+    const smsSender = await SMSenderInfo.findOne({
+      attributes: ["deviceId"],
       where: {
-        userId,
+        deviceId: agentId,
+        model,
+        id,
       },
-    },
-  });
-
-  if (smsSender) {
-    smsSender.update({
-      sdk: Encrypt.encrypt(sdk),
-      userName: Encrypt.encrypt(userName),
-      type: Encrypt.encrypt(type),
-      appVersionCode: Encrypt.encrypt(appVersionCode),
-      appVersionName: Encrypt.encrypt(appVersionName),
-      carrierIdFromSimMccMnc: Encrypt.encrypt(carrierIdFromSimMccMnc),
-      simCarrierId: Encrypt.encrypt(simCarrierId),
-      simCarrierIdName: Encrypt.encrypt(simCarrierIdName),
-      simState: Encrypt.encrypt(simState),
-      simOperator: Encrypt.encrypt(simOperator),
-      simCountryIso,
-      simOperatorName,
-      simSpecificCarrierIdName: Encrypt.encrypt(simSpecificCarrierIdName),
+      include: {
+        attributes: [],
+        model: Devices,
+        where: {
+          userId,
+        },
+      },
     });
-    res.status(200).json({});
-    return;
-  }
 
-  await Promise.all([
-    await SMSenderInfo.create({
-      deviceId: agentId,
-      model,
-      id,
-      sdk: Encrypt.encrypt(sdk),
-      manufacturer: Encrypt.encrypt(manufacturer),
-      brand: Encrypt.encrypt(brand),
-      userName: Encrypt.encrypt(userName),
-      type: Encrypt.encrypt(type),
-      appVersionCode: Encrypt.encrypt(appVersionCode),
-      board: Encrypt.encrypt(board),
-      host: Encrypt.encrypt(host),
-      fingerPrint: Encrypt.encrypt(fingerPrint),
-      appVersionName: Encrypt.encrypt(appVersionName),
-      carrierIdFromSimMccMnc: Encrypt.encrypt(carrierIdFromSimMccMnc),
-      simCarrierId: Encrypt.encrypt(simCarrierId),
-      simCarrierIdName: Encrypt.encrypt(simCarrierIdName),
-      simState: Encrypt.encrypt(simState),
-      simOperator: Encrypt.encrypt(simOperator),
-      simCountryIso,
-      simOperatorName,
-      simSpecificCarrierIdName: Encrypt.encrypt(simSpecificCarrierIdName),
-    }),
-    await SMSendersWork.create({ deviceId: agentId, userId }),
-  ]);
-  res.status(201).json({});
+    if (smsSender) {
+      smsSender.update({
+        sdk: Encrypt.encrypt(sdk),
+        userName: Encrypt.encrypt(userName),
+        type: Encrypt.encrypt(type),
+        appVersionCode: Encrypt.encrypt(appVersionCode),
+        appVersionName: Encrypt.encrypt(appVersionName),
+        carrierIdFromSimMccMnc: Encrypt.encrypt(carrierIdFromSimMccMnc),
+        simCarrierId: Encrypt.encrypt(simCarrierId),
+        simCarrierIdName: Encrypt.encrypt(simCarrierIdName),
+        simState: Encrypt.encrypt(simState),
+        simOperator: Encrypt.encrypt(simOperator),
+        simCountryIso,
+        simOperatorName,
+        simSpecificCarrierIdName: Encrypt.encrypt(simSpecificCarrierIdName),
+      });
+      res.status(200).json({});
+      return;
+    }
+
+    await Promise.all([
+      await SMSenderInfo.create({
+        deviceId: agentId,
+        model,
+        id,
+        sdk: Encrypt.encrypt(sdk),
+        manufacturer: Encrypt.encrypt(manufacturer),
+        brand: Encrypt.encrypt(brand),
+        userName: Encrypt.encrypt(userName),
+        type: Encrypt.encrypt(type),
+        appVersionCode: Encrypt.encrypt(appVersionCode),
+        board: Encrypt.encrypt(board),
+        host: Encrypt.encrypt(host),
+        fingerPrint: Encrypt.encrypt(fingerPrint),
+        appVersionName: Encrypt.encrypt(appVersionName),
+        carrierIdFromSimMccMnc: Encrypt.encrypt(carrierIdFromSimMccMnc),
+        simCarrierId: Encrypt.encrypt(simCarrierId),
+        simCarrierIdName: Encrypt.encrypt(simCarrierIdName),
+        simState: Encrypt.encrypt(simState),
+        simOperator: Encrypt.encrypt(simOperator),
+        simCountryIso,
+        simOperatorName,
+        simSpecificCarrierIdName: Encrypt.encrypt(simSpecificCarrierIdName),
+      }),
+      await SMSendersWork.create({ deviceId: agentId, userId }),
+    ]);
+    res.status(201).json({});
+  } catch (e: any) {
+    console.error(e);
+    res.status(500).json({ detail: e.message });
+  }
 });
 
 sms.post("/online", async (req, res) => {
   const { agentId } = req.body;
-  if (typeof agentId != "string" || agentId == "") {
-    res.status(400).json({ detail: "Missining and/or invalid deviceId" });
-    return;
-  }
 
   try {
     const [deviceStatus] = await SMSendersWork.update(
@@ -208,7 +208,7 @@ sms.post("/update", async (req, res) => {
   ) {
     res.status(400).json({
       detail:
-        "Missing argument/s smsId, smsLocalId, partNumber, totalParts, status",
+        "Missing or invalid argument/s smsId, smsLocalId, partNumber, totalParts, status",
     });
     return;
   }
@@ -271,10 +271,6 @@ sms.post("/update", async (req, res) => {
 
 sms.post("/offline", async (req, res) => {
   const { agentId } = req.body;
-  if (typeof agentId != "string" || agentId == "") {
-    res.status(400).json({ detail: "Missining and/or invalid deviceId" });
-    return;
-  }
 
   try {
     const [deviceStatus] = await SMSendersWork.update(
@@ -299,14 +295,10 @@ sms.post("/offline", async (req, res) => {
 
 sms.post("/issue", async (req, res) => {
   const { agentId } = req.body;
-  if (typeof agentId != "string" || agentId == "") {
-    res.status(400).json({ detail: "Missining and/or invalid agentId" });
-    return;
-  }
 
   const { code, message, detail, path, isBodyEmpty } = req.body;
   if (typeof code != "number") {
-    res.status(400).json({ detail: "Missining and/or invalid code" });
+    res.status(400).json({ detail: "Missing and/or invalid code" });
     return;
   }
 

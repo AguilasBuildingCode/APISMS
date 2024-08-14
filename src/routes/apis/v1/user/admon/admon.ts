@@ -60,7 +60,7 @@ admon.put("/devices", async (req, res) => {
     res.status(201).sendFile(qrPath);
   } catch (e: any) {
     console.error(e);
-    res.status(400).json({ detail: e.message });
+    res.status(500).json({ detail: e.message });
   }
 });
 
