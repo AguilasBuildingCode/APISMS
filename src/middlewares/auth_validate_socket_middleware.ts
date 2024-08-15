@@ -6,7 +6,7 @@ const jwt = new JWT();
 const authValidateSocketMiddleware: (
   socket: Socket,
   next: (err?: ExtendedError | undefined) => void
-) => void = (socket, next) => {
+) => void = async (socket, next) => {
   const token =
     socket.handshake.headers["Authorization"] ??
     socket.handshake.headers["authorization"] ??
@@ -23,9 +23,9 @@ const authValidateSocketMiddleware: (
   }
 
   try {
-    let agent = jwt.verify(splitedToke[1]);
+    let agent = await jwt.verify(splitedToke[1]);
     if (jwt.isRefreshToken(agent)) {
-      agent = jwt.decode(agent.parentToken);
+      agent = await jwt.decode(agent.parentToken);
     }
     if (jwt.isDevice(agent)) {
       next();

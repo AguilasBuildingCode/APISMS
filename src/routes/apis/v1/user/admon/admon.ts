@@ -4,6 +4,8 @@ import PsswdEncrypt from "../../../../../security/passwd_encrypt";
 import { v4 as uuid } from "uuid";
 import QRcode from "qrcode";
 import Utils from "../../../../../utils/utils";
+import { UserType } from "../../../../../enums/users_types";
+import Users from "../../../../../db/models/users_model";
 
 const admon = express.Router();
 const admonPath = "/admon";
@@ -61,6 +63,57 @@ admon.put("/devices", async (req, res) => {
   } catch (e: any) {
     console.error(e);
     res.status(500).json({ detail: e.message });
+  }
+});
+
+admon.post("/users", async (req, res) => {
+  const { id, type, businessName, userName, password } = req.body
+  if (
+    typeof businessName != "string" ||
+    businessName.length < 3 ||
+    typeof userName != "string" ||
+    !Utils.isEmail(userName) ||
+    typeof password != "string" ||
+    password.length < 8
+  ) {
+    res.status(400).json({ detail: "Missing or invalid businessName and/or userName and/or password" })
+    return
+  }
+
+  if (type != UserType.ROOT) {
+    const agent = await Users.findByPk(id) ?? await Devices.findByPk(id)
+    const attemptsForbidden = Number(agent?.getDataValue("attemptsForbidden")) + 1
+    agent?.update({
+      attemptsForbidden: attemptsForbidden,
+      locked: attemptsForbidden >= 3,
+    });
+    res.status(403).json({ detail: "Unauthorized action" })
+    return
+  }
+
+  try {
+    const { length } = await Users.findAll({
+      where: {
+        userName
+      }
+    })
+
+    if (length > 0) {
+      res.status(400).json({ detail: "User already registered" })
+      return
+    }
+
+    const user = await Users.create({
+      id: uuid(),
+      businessName,
+      userName,
+      password: await PsswdEncrypt.hash(password),
+      type: UserType.COMMON,
+    })
+    res.status(200).json({ agentId: user.getAgentId() })
+  } catch (e: any) {
+    console.error(e)
+    res.status(500).json({ detail: e.message })
   }
 });
 

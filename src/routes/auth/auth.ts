@@ -27,7 +27,7 @@ const authMiddleware: RequestHandler<any> = async (req, res, next) => {
         order: [["tokenExpireAt", "DESC"]],
       });
 
-      if (currentConn && jwt.verify(currentConn.getDataValue("token"))) {
+      if (currentConn && await jwt.verify(currentConn.getDataValue("token"))) {
         res.status(401).json({
           detail: "Your last connection already is valid",
           ...currentConn.asConnInfo(),
@@ -49,7 +49,7 @@ auth.post("/login", async (req, res) => {
     req.body;
   try {
     try {
-      if (parentToken && currentConn && jwt.verify(parentToken)) {
+      if (parentToken && currentConn && await jwt.verify(parentToken)) {
         res.status(401).json({
           detail: "Your last connection already is valid",
           ...currentConn,
@@ -57,7 +57,7 @@ auth.post("/login", async (req, res) => {
         return;
       }
 
-      if (!parentToken && token && currentConn && jwt.verify(token)) {
+      if (!parentToken && token && currentConn && await jwt.verify(token)) {
         res.status(401).json({
           detail: "Your last connection already is valid",
           ...currentConn,
@@ -111,7 +111,7 @@ auth.post("/valid", async (req, res) => {
   const { parentToken, currentConn } = req.body;
   if (parentToken && parentToken != "") {
     try {
-      jwt.verify(parentToken);
+      await jwt.verify(parentToken);
       res.status(200).send({ ...currentConn });
     } catch (e) {
       console.error(e);

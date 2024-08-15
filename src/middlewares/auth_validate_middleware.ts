@@ -30,10 +30,10 @@ const authValidateMiddleware: RequestHandler<any> = async (req, res, next) => {
       return;
     }
 
-    const agent = jwt.verify(splitedToke[1]);
+    const agent = await jwt.verify(splitedToke[1]);
     let parentAgent: AgentToken | undefined = undefined;
     if (jwt.isRefreshToken(agent)) {
-      parentAgent = jwt.decode(agent.parentToken);
+      parentAgent = await jwt.decode(agent.parentToken);
     }
 
     req.body = {
@@ -46,6 +46,7 @@ const authValidateMiddleware: RequestHandler<any> = async (req, res, next) => {
       currentConn: currentConn.asConnInfo(),
       ...req.body,
     };
+
     next();
   } catch (e: any) {
     console.error(e);

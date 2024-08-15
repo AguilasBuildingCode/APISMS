@@ -29,6 +29,7 @@ class Devices extends Model {
       userName: this.getDataValue("userName"),
       password: realPassword,
       attemptsLogin: this.getDataValue("attemptsLogin"),
+      attemptsForbidden: this.getDataValue("attemptsForbidden"),
       locked: this.getDataValue("locked"),
     };
   }
@@ -67,6 +68,11 @@ Devices.init(
       },
     },
     attemptsLogin: {
+      type: DataTypes.TINYINT,
+      defaultValue: 0,
+      allowNull: false,
+    },
+    attemptsForbidden: {
       type: DataTypes.TINYINT,
       defaultValue: 0,
       allowNull: false,

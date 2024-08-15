@@ -14,7 +14,7 @@ export const JWTRefreshTokenExtraLifeTimeMillis = 300000;
 export type AgentToken = Users | Devices | RefreshToken;
 
 export default class JWT {
-  constructor(private config = Config.getInstance()) {}
+  constructor(private config = Config.getInstance()) { }
 
   private getToken(
     who: any,
@@ -59,7 +59,7 @@ export default class JWT {
       try {
         const token = this.getToken(who.asTokenData(password), tokenExpireAt);
         const refreshToken = this.getToken(
-          { parentToken: token },
+          { parentToken: token, },
           refreshTokenExpireAt
         );
         const conn = await Connection.create({
@@ -79,27 +79,38 @@ export default class JWT {
     });
   }
 
-  verify(token: string): AgentToken {
-    const agent = this.verifyToken(token);
-
-    if (typeof agent == "string") {
-      throw new Error("Invalid token");
+  async verify(token: string): Promise<AgentToken> {
+    const { data } = this.verifyToken(token);
+    if (this.isUser(data) || this.isDevice(data)) {
+      const agent = await Users.findByPk((data as any).id) ?? await Devices.findByPk((data as any).id);
+      if (agent) {
+        return { ...agent.toJSON(), password: (data as any).password } as any
+      }
+      return data;
     }
-
-    if (typeof agent == "object") {
-      return agent.data;
+    if (this.isRefreshToken(data)) {
+      return data;
     }
     throw new Error("Invalid token");
   }
 
-  decode(token: string): AgentToken {
+  async decode(token: string): Promise<AgentToken> {
     const agent = jwt.decode(token);
-    if (typeof agent == "string") {
+
+    if (!agent || typeof agent != "object") {
       throw new Error("Invalid token");
     }
 
-    if (agent && typeof agent == "object") {
-      return agent.data;
+    const { data } = agent
+    if (this.isUser(data) || this.isDevice(data)) {
+      const agent = await Users.findByPk((data as any).id) ?? await Devices.findByPk((data as any).id);
+      if (agent) {
+        return { ...agent.toJSON(), password: (data as any).password } as any
+      }
+      return data;
+    }
+    if (this.isRefreshToken(data)) {
+      return data;
     }
     throw new Error("Invalid token");
   }
@@ -112,6 +123,7 @@ export default class JWT {
       Object.prototype.hasOwnProperty.call(object, "password") &&
       Object.prototype.hasOwnProperty.call(object, "type") &&
       Object.prototype.hasOwnProperty.call(object, "attemptsLogin") &&
+      Object.prototype.hasOwnProperty.call(object, "attemptsForbidden") &&
       Object.prototype.hasOwnProperty.call(object, "locked")
     );
   }
@@ -123,6 +135,7 @@ export default class JWT {
       Object.prototype.hasOwnProperty.call(object, "userName") &&
       Object.prototype.hasOwnProperty.call(object, "password") &&
       Object.prototype.hasOwnProperty.call(object, "attemptsLogin") &&
+      Object.prototype.hasOwnProperty.call(object, "attemptsForbidden") &&
       Object.prototype.hasOwnProperty.call(object, "locked")
     );
   }

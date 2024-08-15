@@ -2,11 +2,11 @@ import { DataTypes, Model } from "sequelize";
 import { smsSequelize } from "../sequelize";
 import { v4 as uuid } from "uuid";
 import PsswdEncrypt from "../../security/passwd_encrypt";
-// import Encrypt from "../../security/encrypt";
 import Business from "./business_model";
 import Connection from "./connection_model";
 import SMS from "./sms_model";
 import Devices from "./devices_model";
+import { UserType } from "../../enums/users_types";
 
 class Users extends Model {
   getAgentId() {
@@ -20,6 +20,7 @@ class Users extends Model {
       password: realPassword,
       type: this.getDataValue("type"),
       attemptsLogin: this.getDataValue("attemptsLogin"),
+      attemptsForbidden: this.getDataValue("attemptsForbidden"),
       locked: this.getDataValue("locked"),
     };
   }
@@ -58,10 +59,15 @@ Users.init(
       },
     },
     type: {
-      type: DataTypes.STRING,
+      type: DataTypes.ENUM(UserType.ROOT, UserType.COMMON),
       allowNull: false,
     },
     attemptsLogin: {
+      type: DataTypes.TINYINT,
+      defaultValue: 0,
+      allowNull: false,
+    },
+    attemptsForbidden: {
       type: DataTypes.TINYINT,
       defaultValue: 0,
       allowNull: false,
