@@ -154,7 +154,6 @@ sms.post("/online", async (req, res) => {
 });
 
 sms.post("/pending", async (req, res) => {
-  console.log(JSON.stringify({ body: req.body }));
   const { agentId, smsIds } = req.body;
   if (!(smsIds instanceof Array) || smsIds.length == 0) {
     res.status(400).json({ detail: "Missing o invalid apiSMSIdsPending" });

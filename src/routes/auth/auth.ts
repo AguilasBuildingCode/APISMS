@@ -12,25 +12,30 @@ const auth = express.Router();
 const authPath = "/auth";
 
 const authMiddleware: RequestHandler<any> = async (req, res, next) => {
-  const { agentId, userName, password } = req.body;
+  const { agentId, userName, password, publicKey } = req.body;
+
   if (
     typeof agentId == "string" &&
     typeof userName == "string" &&
-    typeof password == "string"
+    typeof password == "string" &&
+    typeof publicKey == "string"
   ) {
     try {
       const currentConn = await Connection.findOne({
         where: {
           agentId,
+          tokenExpireAt: {
+            [Op.gte]: Date.now(),
+          },
           deleted: false,
         },
-        order: [["tokenExpireAt", "DESC"]],
+        order: [["tokenExpireAt", "ASC"]],
       });
 
-      if (currentConn && await jwt.verify(currentConn.getDataValue("token"))) {
+      if (currentConn) {
         res.status(401).json({
           detail: "Your last connection already is valid",
-          ...currentConn.asConnInfo(),
+          ...currentConn.asUserConnInfo(),
         });
         return;
       }
@@ -45,8 +50,9 @@ const authMiddleware: RequestHandler<any> = async (req, res, next) => {
 };
 
 auth.post("/login", async (req, res) => {
-  const { agentId, userName, password, parentToken, token, currentConn } =
+  const { agentId, userName, password, parentToken, token, currentConn, publicKey } =
     req.body;
+
   try {
     try {
       if (parentToken && currentConn && await jwt.verify(parentToken)) {
@@ -88,8 +94,8 @@ auth.post("/login", async (req, res) => {
       userName == agent.getDataValue("userName") &&
       (await PsswdEncrypt.compare(password, agent.getDataValue("password")))
     ) {
-      const conn = await jwt.sing(agent, password);
-      res.status(200).json(conn.asUserInfo());
+      const { token, tokenLifeTime, tokenExpireAt, refreshToken, refreshTokenExtraLifeTime, refreshTokenExpireAt, createdAt } = await jwt.sing(agent, publicKey, password);
+      res.status(200).json({ token, tokenLifeTime, tokenExpireAt, refreshToken, refreshTokenExtraLifeTime, refreshTokenExpireAt, createdAt });
       return;
     }
 
@@ -123,7 +129,7 @@ auth.post("/valid", async (req, res) => {
 });
 
 auth.post("/logout", async (req, res) => {
-  const { token } = req.body;
+  const { connId } = req.body;
 
   try {
     const [logout] = await Connection.update(
@@ -132,7 +138,7 @@ auth.post("/logout", async (req, res) => {
       },
       {
         where: {
-          [Op.or]: [{ token }, { refreshToken: token }],
+          id: connId
         },
       }
     );

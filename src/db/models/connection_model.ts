@@ -4,12 +4,10 @@ import Users from "./users_model";
 import Devices from "./devices_model";
 
 class Connection extends Model {
-  asUserInfo() {
+  asUserConnInfo() {
     return {
-      token: this.getDataValue("token"),
       tokenLifeTime: this.getDataValue("tokenLifeTime"),
       tokenExpireAt: this.getDataValue("tokenExpireAt"),
-      refreshToken: this.getDataValue("refreshToken"),
       refreshTokenExtraLifeTime: this.getDataValue("refreshTokenExtraLifeTime"),
       refreshTokenExpireAt: this.getDataValue("refreshTokenExpireAt"),
       createdAt: this.getDataValue("createdAt"),
@@ -17,10 +15,12 @@ class Connection extends Model {
   }
   asConnInfo() {
     return {
+      id: this.getDataValue("id"),
       tokenLifeTime: this.getDataValue("tokenLifeTime"),
       tokenExpireAt: this.getDataValue("tokenExpireAt"),
       refreshTokenExtraLifeTime: this.getDataValue("refreshTokenExtraLifeTime"),
       refreshTokenExpireAt: this.getDataValue("refreshTokenExpireAt"),
+      publicKey: this.getDataValue("publicKey"),
       createdAt: this.getDataValue("createdAt"),
     };
   }
@@ -28,10 +28,20 @@ class Connection extends Model {
 
 Connection.init(
   {
-    token: {
-      type: DataTypes.STRING,
-      primaryKey: true,
+    id: {
+      type: DataTypes.UUID,
       allowNull: false,
+      primaryKey: true,
+      validate: {
+        isUUID: 4,
+      },
+    },
+    agentId: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      validate: {
+        isUUID: 4,
+      },
     },
     tokenLifeTime: {
       type: DataTypes.BIGINT,
@@ -39,11 +49,6 @@ Connection.init(
     },
     tokenExpireAt: {
       type: DataTypes.BIGINT,
-      allowNull: false,
-    },
-    refreshToken: {
-      type: DataTypes.STRING,
-      primaryKey: true,
       allowNull: false,
     },
     refreshTokenExtraLifeTime: {
@@ -54,12 +59,9 @@ Connection.init(
       type: DataTypes.BIGINT,
       allowNull: false,
     },
-    agentId: {
-      type: DataTypes.UUID,
+    publicKey: {
+      type: DataTypes.STRING,
       allowNull: false,
-      validate: {
-        isUUID: 4,
-      },
     },
     createdAt: {
       type: DataTypes.BIGINT,

@@ -18,11 +18,21 @@ const authValidateMiddleware: RequestHandler<any> = async (req, res, next) => {
   }
 
   try {
+    const agentId = await jwt.verify(splitedToke[1]);
+    let parentAgent: AgentToken | undefined = undefined;
+    if (jwt.isRefreshToken(agentId)) {
+      parentAgent = await jwt.decode(agentId.parentToken);
+    }
+
     const currentConn = await Connection.findOne({
       where: {
-        [Op.or]: [{ token: splitedToke[1] }, { refreshToken: splitedToke[1] }],
+        id: !jwt.isRefreshToken(agentId) ? (agentId as any).connId : parentAgent && !jwt.isRefreshToken(parentAgent) ? (parentAgent as any).connId : '',
+        refreshTokenExpireAt: {
+          [Op.gte]: Date.now(),
+        },
         deleted: false,
       },
+      order: [["tokenExpireAt", "ASC"]],
     });
 
     if (!currentConn) {
@@ -30,26 +40,20 @@ const authValidateMiddleware: RequestHandler<any> = async (req, res, next) => {
       return;
     }
 
-    const agent = await jwt.verify(splitedToke[1]);
-    let parentAgent: AgentToken | undefined = undefined;
-    if (jwt.isRefreshToken(agent)) {
-      parentAgent = await jwt.decode(agent.parentToken);
-    }
-
     req.body = {
       agentId:
-        (agent as any).id ||
+        (agentId as any).id ||
         (parentAgent as any).id,
-      ...agent,
+      ...agentId,
       ...parentAgent,
       token: splitedToke[1],
-      currentConn: currentConn.asConnInfo(),
+      currentConn: currentConn.asUserConnInfo(),
       ...req.body,
     };
 
     next();
   } catch (e: any) {
-    console.error(e);
+    console.error("authValidateMiddleware-56", e);
     res.status(401).json({ detail: e.message });
   }
 };

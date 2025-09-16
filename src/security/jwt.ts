@@ -3,6 +3,7 @@ import Config, { EnvTypes } from "../config/config";
 import Connection from "../db/models/connection_model";
 import Users from "../db/models/users_model";
 import Devices from "../db/models/devices_model";
+import { v4 as uuid } from "uuid";
 
 export interface RefreshToken {
   parentToken: string;
@@ -50,29 +51,31 @@ export default class JWT {
     });
   }
 
-  sing(who: Users | Devices, password: string): Promise<Connection> {
+  sing(who: Users | Devices, publicKey: string, password: string): Promise<{ id: string, token: string, tokenLifeTime: number, tokenExpireAt: number, refreshToken: string, refreshTokenExtraLifeTime: number, refreshTokenExpireAt: number, createdAt: number }> {
     const createdAt = Date.now();
     const tokenExpireAt = createdAt + JWTTokenLifeTimeMillis;
     const refreshTokenExpireAt =
       tokenExpireAt + JWTRefreshTokenExtraLifeTimeMillis;
     return new Promise(async (res, rej) => {
       try {
-        const token = this.getToken(who.asTokenData(password), tokenExpireAt);
+        const conn = await Connection.create({
+          id: uuid(),
+          agentId: who.getAgentId(),
+          tokenLifeTime: JWTTokenLifeTimeMillis,
+          tokenExpireAt,
+          refreshTokenExtraLifeTime: JWTRefreshTokenExtraLifeTimeMillis,
+          refreshTokenExpireAt,
+          publicKey,
+          createdAt,
+        });
+
+        const token = this.getToken({ connId: conn.getDataValue("id"), ...who.asTokenData(password) }, tokenExpireAt);
         const refreshToken = this.getToken(
           { parentToken: token, },
           refreshTokenExpireAt
         );
-        const conn = await Connection.create({
-          token,
-          tokenLifeTime: JWTTokenLifeTimeMillis,
-          tokenExpireAt,
-          refreshToken,
-          refreshTokenExtraLifeTime: JWTRefreshTokenExtraLifeTimeMillis,
-          refreshTokenExpireAt,
-          agentId: who.getAgentId(),
-          createdAt: createdAt,
-        });
-        res(conn);
+
+        res({ token, refreshToken, ...conn.asConnInfo() });
       } catch (e) {
         rej(e);
       }
@@ -84,7 +87,7 @@ export default class JWT {
     if (this.isUser(data) || this.isDevice(data)) {
       const agent = await Users.findByPk((data as any).id) ?? await Devices.findByPk((data as any).id);
       if (agent) {
-        return { ...agent.toJSON(), password: (data as any).password } as any
+        return { ...data, ...agent.toJSON(), password: (data as any).password } as any
       }
       return data;
     }
@@ -105,7 +108,7 @@ export default class JWT {
     if (this.isUser(data) || this.isDevice(data)) {
       const agent = await Users.findByPk((data as any).id) ?? await Devices.findByPk((data as any).id);
       if (agent) {
-        return { ...agent.toJSON(), password: (data as any).password } as any
+        return { ...data, ...agent.toJSON(), password: (data as any).password } as any
       }
       return data;
     }
