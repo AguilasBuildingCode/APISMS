@@ -13,6 +13,7 @@ if node_env != None and node_env != '':
 
     current_path = os.getcwd()
     dist_path = os.path.join(current_path, 'dist')
+    cert_path = os.path.join(dist_path, 'cert')
 
     if os.path.exists(dist_path):
         logs_path = os.path.join(dist_path, 'logs')
@@ -33,5 +34,8 @@ if node_env != None and node_env != '':
             file.write(f'ROOT_USER_PASSWORD={uuid.uuid4()}\n')
             file.write('ROOT_USER_TYPE=ROOT\n')
             file.close()
+        if not os.path.exists(cert_path):
+            os.mkdir(cert_path)
+        
 else:
     print('NODE_ENV not found')
